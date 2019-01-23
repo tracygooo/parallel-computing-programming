@@ -76,8 +76,20 @@ int main( int argc , char ** agrv ) {
         printf( "%d" , bin1[j] ) ;
     }
 
+    /***************************************************
+     * Carry-Lookahead Adder Algorithm 
+     **************************************************/
     ComputeGiPi() ;
     ComputeGgjGpj() ;
+    ComputeSgkSpk() ;
+    ComputeSsglSspl() ;
+    ComputeSscl() ;
+
+    /*
+    printf( "ngroups: %d\n" , ngroups ) ;
+    printf( "nsections: %d\n" , nsections ) ; 
+    printf( "nsupersections: %d\n" , nsupersections ) ;
+    */
 
     return EXIT_SUCCESS ;
 }
@@ -180,6 +192,70 @@ int ComputeGgjGpj(){
     PrintArray( gpj , ngroups , "gpj" ) ;
 
     return EXIT_SUCCESS ;
+}
+
+int ComputeSgkSpk(){
+    int k ;
+    int j ;
+    for( k = 0 ; k < nsections ; k++ ) {
+        j = k * 8 ;
+        sgk[ k ] = ggj[ j + 7 ] || (
+                   gpj[ j + 7 ] && ggj[ j + 6 ] ) || ( 
+                   gpj[ j + 7 ] && gpj[ j + 6 ] && ggj[ j + 5 ] ) || (
+                   gpj[ j + 7 ] && gpj[ j + 6 ] && gpj[ j + 5 ] && ggj[ j + 4 ] ) || (
+                   gpj[ j + 7 ] && gpj[ j + 6 ] && gpj[ j + 5 ] && gpj[ j + 4 ] && ggj[ j + 3 ] ) || (
+                   gpj[ j + 7 ] && gpj[ j + 6 ] && gpj[ j + 5 ] && gpj[ j + 4 ] && gpj[ j + 3 ] && ggj[ j + 2 ] ) || (
+                   gpj[ j + 7 ] && gpj[ j + 6 ] && gpj[ j + 5 ] && gpj[ j + 4 ] && gpj[ j + 3 ] && gpj[ j + 2 ] && ggj[ j + 1 ] ) || (
+                   gpj[ j + 7 ] && gpj[ j + 6 ] && gpj[ j + 5 ] && gpj[ j + 4 ] && gpj[ j + 3 ] && gpj[ j + 2 ] && gpj[ j + 1 ] && ggj[ j ] ) ;
+
+        spk[ k ] = gpj[ j + 7 ] && gpj[ j + 6 ] && gpj[ j + 5 ] && gpj[ j + 4 ] && gpj[ j + 3 ] && gpj[ j + 2 ] && gpj[ j + 1 ] && gpj[ j ] ;
+    }
+
+    PrintArray( sgk , nsections , "sgk" ) ;
+    PrintArray( spk , nsections, "spk" ) ;
+
+    return EXIT_SUCCESS ;
+}
+
+int ComputeSsglSspl(){
+    int l ;
+    int k ;
+    for( l = 0 ; l < nsupersections ; l++ ) {
+        k = l * 8 ;
+        ssgl[ l ] = sgk[ k + 7 ] || (
+                   spk[ k + 7 ] && sgk[ k + 6 ] ) || ( 
+                   spk[ k + 7 ] && spk[ k + 6 ] && sgk[ k + 5 ] ) || (
+                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && sgk[ k + 4 ] ) || (
+                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && sgk[ k + 3 ] ) || (
+                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && sgk[ k + 2 ] ) || (
+                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && sgk[ k + 1 ] ) || (
+                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && spk[ k + 1 ] && sgk[ k ] ) ;
+
+        sspl[ l ] = spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && spk[ k + 1 ] && spk[ k ] ;
+    }
+
+    PrintArray( ssgl , nsupersections , "ssgl" ) ;
+    PrintArray( sspl , nsupersections, "sspl" ) ;
+
+    return EXIT_SUCCESS ;
+}
+
+int ComputeSscl(){
+    int l ;
+    for( l = 0 ; l < nsupersections ; l++ ) {
+        if( l == 0 ) sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
+        else sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && sscl[ l - 1 ] ) ;
+    }
+    PrintArray( sscl , nsupersections , "sscl" ) ;
+}
+
+int ComputeSck(){
+    int k ;
+    for( k = 0 ; k < nsections ; k++ ) {
+        if( l == 0 ) sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
+        else sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && sscl[ l - 1 ] ) ;
+    }
+    PrintArray( sscl , nsupersections , "sscl" ) ;
 }
 
 int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) {
