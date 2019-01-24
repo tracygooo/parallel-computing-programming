@@ -47,6 +47,13 @@ char hex2[ digits ] ;
 
 int ConvertHexToBinary( const char * hex , int * bin ) ;
 int ComputeGiPi() ;
+int ComputeGgjGpj() ;
+int ComputeSgkSpk() ;
+int ComputeSsglSspl() ;
+int ComputeSscl() ;
+int ComputeSck() ;
+int ComputeGcj() ;
+int ComputeCi() ;
 int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) ;
 
 int main( int argc , char ** agrv ) {
@@ -84,6 +91,9 @@ int main( int argc , char ** agrv ) {
     ComputeSgkSpk() ;
     ComputeSsglSspl() ;
     ComputeSscl() ;
+    ComputeSck() ;
+    ComputeGcj() ;
+    ComputeCi() ;
 
     /*
     printf( "ngroups: %d\n" , ngroups ) ;
@@ -247,15 +257,47 @@ int ComputeSscl(){
         else sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && sscl[ l - 1 ] ) ;
     }
     PrintArray( sscl , nsupersections , "sscl" ) ;
+
+    return EXIT_SUCCESS ;
 }
 
 int ComputeSck(){
     int k ;
     for( k = 0 ; k < nsections ; k++ ) {
-        if( l == 0 ) sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
-        else sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && sscl[ l - 1 ] ) ;
+        if( k % block_size == 0 ) sck[ k ] = sgk[ k ] || ( spk[ k ] && sscl[ k/block_size ] ) ;
+        else sck[ k ] = sgk[ k ] || ( spk[ k ] && sck[ k - 1 ] ) ;
     }
-    PrintArray( sscl , nsupersections , "sscl" ) ;
+    PrintArray( sck , nsections , "sck" ) ;
+
+    return EXIT_SUCCESS ;
+}
+
+int ComputeGcj(){
+    int j ;
+    for( j = 0 ; j < ngroups ; j++ ) {
+        if( j % block_size == 0 ) 
+            gcj[ j ] = ggj[ j ] || ( gpj[ j ] && sck[ j/block_size ] ) ;
+        else 
+            gcj[ j ] = ggj[ j ] || ( gpj[ j ] && gcj[ j - 1 ] ) ;
+    }
+
+    PrintArray( gcj , ngroups , "gcj" ) ;
+
+    return EXIT_SUCCESS ;
+}
+
+int ComputeCi(){
+    int i ;
+    for( i = 0 ; i < ngroups ; i++ ) {
+        if( i % block_size == 0 ) 
+            ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/block_size ] ) ;
+        else 
+            ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i - 1 ] ) ;
+    }
+
+    PrintArray( ci , bits , "ci" ) ;
+
+    return EXIT_SUCCESS ;
 }
 
 int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) {
