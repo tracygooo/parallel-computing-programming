@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // EXAMPLE DATA STRUCTURE DESIGN AND LAYOUT FOR CLA
 #define input_size 1024
@@ -45,6 +46,12 @@ int bin2[ bits ];
 char hex1[ digits ] ;
 char hex2[ digits ] ;
 
+//Character array for outputs in hex form
+char opt[ digits ] ;
+
+int ReadInput() ; 
+int CarryLookaheadAdder() ;
+int RippleCarryAdder() ;
 int ConvertHexToBinary( const char * hex , int * bin ) ;
 int ComputeGiPi() ;
 int ComputeGgjGpj() ;
@@ -54,38 +61,52 @@ int ComputeSscl() ;
 int ComputeSck() ;
 int ComputeGcj() ;
 int ComputeCi() ;
+int ComputeSumi() ;
+int ConvertBinaryToHex() ; 
 int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) ;
 
 int main( int argc , char ** agrv ) {
     
-    /***********************************************************
-     * Add 0 to the begining of hex array
-     * Read numbers from redirected file to array hex1 and hex2  
-     ***********************************************************/
+    // Read numbers from redirected file to array hex1 and hex2  
+    ReadInput() ;
+
+    // Convert hex to binary and revert binary 
+    ConvertHexToBinary( hex1 , bin1 ) ;
+    ConvertHexToBinary( hex2 , bin2 ) ;
+    PrintArray( bin1 , bits , "bin1" ) ; 
+    PrintArray( bin2 , bits , "bin2" ) ; 
+
+    // Carry-Lookahead Adder Algorithm 
+    CarryLookaheadAdder() ;
+
+    // Ripper Carry Adder Algorithm 
+    // RippleCarryAdder() ; 
+
+    // Convert binary sumi to hex form 
+    ConvertBinaryToHex() ; 
+
+    return EXIT_SUCCESS ;
+}
+
+int ReadInput() { 
+
+    // Add 0 to the begining of hex array
     hex1[ 0 ] = '0' ;
     hex2[ 0 ] = '0' ;
+
+    // Read numbers from redirected file to array hex1 and hex2  
     if( scanf( "%s %s" , hex1 + 1 , hex2 + 1 ) != 2 ) {
         printf( "Number of input hex is not 2...\n") ;
         return EXIT_FAILURE ;
     }
-    printf( "hex1: %s\n" , hex1 ) ;
-    printf( "hex2: %s\n" , hex2 ) ;
 
-    /***************************************************
-     * Convert hex to binary
-     * Revert binary 
-     **************************************************/
-    ConvertHexToBinary( hex1 , bin1 ) ;
-    ConvertHexToBinary( hex2 , bin2 ) ;
-    int j ;
-    printf( "bin1:" ) ;
-    for( j = 0 ; j < bits ; j++ ) {
-        printf( "%d" , bin1[j] ) ;
-    }
+    printf( "hex1:\n%s\n\n" , hex1 ) ;
+    printf( "hex2:\n%s\n\n" , hex2 ) ;
 
-    /***************************************************
-     * Carry-Lookahead Adder Algorithm 
-     **************************************************/
+    return EXIT_SUCCESS ;
+}
+
+int CarryLookaheadAdder() {
     ComputeGiPi() ;
     ComputeGgjGpj() ;
     ComputeSgkSpk() ;
@@ -94,12 +115,24 @@ int main( int argc , char ** agrv ) {
     ComputeSck() ;
     ComputeGcj() ;
     ComputeCi() ;
+    ComputeSumi() ;
+    return EXIT_SUCCESS ;
+}
 
-    /*
-    printf( "ngroups: %d\n" , ngroups ) ;
-    printf( "nsections: %d\n" , nsections ) ; 
-    printf( "nsupersections: %d\n" , nsupersections ) ;
-    */
+int RippleCarryAdder() {
+    int i ;
+    for( i = 0 ; i < bits ; i++ ){
+        if( i == 0 ) ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
+        else ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i -1 ] ) ;
+    }
+
+    for( i = 0 ; i < bits ; i++ ){
+        if( i == 0 ) sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ 0 ;
+        else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
+    }
+
+    PrintArray( ci , bits , "ripple ci" ) ;
+    PrintArray( sumi , bits , "ripple sumi" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -165,6 +198,67 @@ int ConvertHexToBinary( const char * hex , int * bin ) {
         }
     }
 
+    return EXIT_SUCCESS ;
+}
+
+int ConvertBinaryToHex() {
+    // Change sumi to test whether this function works
+    /*
+    sumi[ 0 ] = 1 ;
+    sumi[ 1 ] = 1 ;
+    sumi[ 2 ] = 1 ;
+    sumi[ 3 ] = 1 ;
+    */
+
+    // i: iter for sumi, j: iter for opt, my_sum: sum of every four bits 
+    int i , j , my_sum ;
+    i = bits - 1 ;
+    j = 0 ;
+    while( i >= 3 ) 
+    {
+        my_sum = 0 ;
+        my_sum += sumi[ i ] * 2 * 2 * 2 ;
+        i-- ;
+        my_sum += sumi[ i ] * 2 * 2 ;
+        i-- ;
+        my_sum += sumi[ i ] * 2 ;
+        i-- ;
+        my_sum += sumi[ i ] ;
+        i-- ;
+
+        /*
+        for( k = 0 ; k < 4 ; k ++ ) {
+            my_sum += sumi[ i ] * pow( 2.0 ,  double( 3 - k ) ) ;
+            i-- ;
+        }
+        */
+
+        if ( my_sum <= 9 ) opt[ j ] = my_sum  + '0' ;
+        else 
+        {
+            switch( my_sum ) {
+                case 10 :
+                    opt[ j ] = 'A' ; break ;
+                case 11 :
+                    opt[ j ] = 'B' ; break ;
+                case 12 :
+                    opt[ j ] = 'C' ; break ;
+                case 13 :
+                    opt[ j ] = 'D' ; break ;
+                case 14 :
+                    opt[ j ] = 'E' ; break ;
+                case 15 :
+                    opt[ j ] = 'F' ; break ;
+                default :
+                    printf( "Invalid hex number...\n" ) ;
+                    return EXIT_FAILURE ;
+            }
+        }
+        
+        j++ ;
+    }
+
+    printf( "Addition:\n%s\n\n" , opt ) ;
     return EXIT_SUCCESS ;
 }
 
@@ -288,7 +382,7 @@ int ComputeGcj(){
 
 int ComputeCi(){
     int i ;
-    for( i = 0 ; i < ngroups ; i++ ) {
+    for( i = 0 ; i < bits ; i++ ) {
         if( i % block_size == 0 ) 
             ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/block_size ] ) ;
         else 
@@ -300,12 +394,26 @@ int ComputeCi(){
     return EXIT_SUCCESS ;
 }
 
+int ComputeSumi() {
+    int i ;
+    for( i = 0 ; i < bits ; i++ ){
+        if( i == 0 ) sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ 0 ;
+        else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
+    }
+
+    PrintArray( sumi , bits , "sumi" ) ;
+
+    return EXIT_SUCCESS ;
+}
+
 int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) {
-    printf( "\n%s:\n" , arr_name ) ;
+    printf( "%s:\n" , arr_name ) ;
     int i ;
     for( i = 0 ; i < arr_size ; i++ ) {
         printf( "%d" , arr[i] ) ;
     }
+    printf( "\n\n" ) ;
+
     return EXIT_SUCCESS ;
 }
 
