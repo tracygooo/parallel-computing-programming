@@ -294,7 +294,6 @@ int ComputeGgjGpj(){
 
     PrintArray( ggj , ngroups , "ggj" ) ;
     PrintArray( gpj , ngroups , "gpj" ) ;
-
     return EXIT_SUCCESS ;
 }
 
@@ -347,8 +346,10 @@ int ComputeSsglSspl(){
 int ComputeSscl(){
     int l ;
     for( l = 0 ; l < nsupersections ; l++ ) {
-        if( l == 0 ) sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
-        else sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && sscl[ l - 1 ] ) ;
+        if( l == 0 ) 
+            sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
+        else 
+            sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && sscl[ l - 1 ] ) ;
     }
     PrintArray( sscl , nsupersections , "sscl" ) ;
 
@@ -358,8 +359,12 @@ int ComputeSscl(){
 int ComputeSck(){
     int k ;
     for( k = 0 ; k < nsections ; k++ ) {
-        if( k % block_size == 0 ) sck[ k ] = sgk[ k ] || ( spk[ k ] && sscl[ k/block_size ] ) ;
-        else sck[ k ] = sgk[ k ] || ( spk[ k ] && sck[ k - 1 ] ) ;
+        if( k == 0 ) 
+            sck[ k ] = sgk[ k ] || ( spk[ k ] && 0 ) ;
+        //else if( k % block_size == 0 )
+            //sck[ k ] = sgk[ k ] || ( spk[ k ] && sscl[ k/block_size - 1 ] ) ;
+        else 
+            sck[ k ] = sgk[ k ] || ( spk[ k ] && sck[ k - 1 ] ) ;
     }
     PrintArray( sck , nsections , "sck" ) ;
 
@@ -369,8 +374,10 @@ int ComputeSck(){
 int ComputeGcj(){
     int j ;
     for( j = 0 ; j < ngroups ; j++ ) {
-        if( j % block_size == 0 ) 
-            gcj[ j ] = ggj[ j ] || ( gpj[ j ] && sck[ j/block_size ] ) ;
+        if( j == 0 ) 
+            gcj[ j ] = ggj[ j ] || ( gpj[ j ] && 0 ) ;
+        //else if( j % block_size == 0 ) 
+        //    gcj[ j ] = ggj[ j ] || ( gpj[ j ] && sck[ j/block_size - 1 ] ) ;
         else 
             gcj[ j ] = ggj[ j ] || ( gpj[ j ] && gcj[ j - 1 ] ) ;
     }
@@ -383,8 +390,10 @@ int ComputeGcj(){
 int ComputeCi(){
     int i ;
     for( i = 0 ; i < bits ; i++ ) {
-        if( i % block_size == 0 ) 
-            ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/block_size ] ) ;
+        if( i == 0 ) 
+            ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
+        //else if( i % block_size == 0 ) 
+        //    ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/block_size ] - 1 ) ;
         else 
             ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i - 1 ] ) ;
     }
