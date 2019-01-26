@@ -3,6 +3,7 @@
  * Simulate a 4,096 bit Carry lookahead adder by using 8-bit blocks
  * Jinghua Feng, fengj3@rpi.edu
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,8 +74,8 @@ int main( int argc , char ** agrv ) {
     // Convert hex to binary and revert binary 
     ConvertHexToBinary( hex1 , bin1 ) ;
     ConvertHexToBinary( hex2 , bin2 ) ;
-    PrintArray( bin1 , bits , "bin1" ) ; 
-    PrintArray( bin2 , bits , "bin2" ) ; 
+    // PrintArray( bin1 , bits , "bin1" ) ; 
+    // PrintArray( bin2 , bits , "bin2" ) ; 
 
     // Carry-Lookahead Adder Algorithm 
     CarryLookaheadAdder() ;
@@ -100,8 +101,8 @@ int ReadInput() {
         return EXIT_FAILURE ;
     }
 
-    printf( "hex1:\n%s\n\n" , hex1 ) ;
-    printf( "hex2:\n%s\n\n" , hex2 ) ;
+    // printf( "hex1:\n%s\n\n" , hex1 ) ;
+    // printf( "hex2:\n%s\n\n" , hex2 ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -131,8 +132,8 @@ int RippleCarryAdder() {
         else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
     }
 
-    PrintArray( ci , bits , "ripple ci" ) ;
-    PrintArray( sumi , bits , "ripple sumi" ) ;
+    // PrintArray( ci , bits , "ripple ci" ) ;
+    // PrintArray( sumi , bits , "ripple sumi" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -216,6 +217,7 @@ int ConvertBinaryToHex() {
     j = 0 ;
     while( i >= 3 ) 
     {
+        // Compute decimal of every four bits 
         my_sum = 0 ;
         my_sum += sumi[ i ] * 2 * 2 * 2 ;
         i-- ;
@@ -258,20 +260,21 @@ int ConvertBinaryToHex() {
         j++ ;
     }
 
-    printf( "Addition:\n%s\n\n" , opt ) ;
+    // printf( "Addition:\n%s\n\n" , opt ) ;
+    printf( "%s\n" , opt ) ;
     return EXIT_SUCCESS ;
 }
 
 int ComputeGiPi(){ 
     int i ;
     for( i = 0 ; i < bits ; i++ ) {
-        //gi[ i ] = bin1[ i ] * bin2[ i ] ;
-        //pi[ i ] = bin1[ i ] + bin2[ i ] - gi[ i ] ;
         gi[ i ] = bin1[ i ] && bin2[ i ] ;
         pi[ i ] = bin1[ i ] || bin2[ i ] ; 
+        //gi[ i ] = bin1[ i ] * bin2[ i ] ;
+        //pi[ i ] = bin1[ i ] + bin2[ i ] - gi[ i ] ;
     }
-    PrintArray( gi , bits , "gi" ) ;
-    PrintArray( pi , bits , "pi" ) ;
+    // PrintArray( gi , bits , "gi" ) ;
+    // PrintArray( pi , bits , "pi" ) ;
     return EXIT_SUCCESS ;
 }
 
@@ -292,8 +295,8 @@ int ComputeGgjGpj(){
         gpj[ j ] = pi[ i + 7 ] && pi[ i + 6 ] && pi[ i + 5 ] && pi[ i + 4 ] && pi[ i + 3 ] && pi[ i + 2 ] && pi[ i + 1 ] && pi[ i ] ;
     }
 
-    PrintArray( ggj , ngroups , "ggj" ) ;
-    PrintArray( gpj , ngroups , "gpj" ) ;
+    // PrintArray( ggj , ngroups , "ggj" ) ;
+    // PrintArray( gpj , ngroups , "gpj" ) ;
     return EXIT_SUCCESS ;
 }
 
@@ -314,8 +317,8 @@ int ComputeSgkSpk(){
         spk[ k ] = gpj[ j + 7 ] && gpj[ j + 6 ] && gpj[ j + 5 ] && gpj[ j + 4 ] && gpj[ j + 3 ] && gpj[ j + 2 ] && gpj[ j + 1 ] && gpj[ j ] ;
     }
 
-    PrintArray( sgk , nsections , "sgk" ) ;
-    PrintArray( spk , nsections, "spk" ) ;
+    // PrintArray( sgk , nsections , "sgk" ) ;
+    // PrintArray( spk , nsections, "spk" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -337,8 +340,8 @@ int ComputeSsglSspl(){
         sspl[ l ] = spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && spk[ k + 1 ] && spk[ k ] ;
     }
 
-    PrintArray( ssgl , nsupersections , "ssgl" ) ;
-    PrintArray( sspl , nsupersections, "sspl" ) ;
+    // PrintArray( ssgl , nsupersections , "ssgl" ) ;
+    // PrintArray( sspl , nsupersections, "sspl" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -351,7 +354,7 @@ int ComputeSscl(){
         else 
             sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && sscl[ l - 1 ] ) ;
     }
-    PrintArray( sscl , nsupersections , "sscl" ) ;
+    // PrintArray( sscl , nsupersections , "sscl" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -366,7 +369,7 @@ int ComputeSck(){
         else 
             sck[ k ] = sgk[ k ] || ( spk[ k ] && sck[ k - 1 ] ) ;
     }
-    PrintArray( sck , nsections , "sck" ) ;
+    // PrintArray( sck , nsections , "sck" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -382,7 +385,7 @@ int ComputeGcj(){
             gcj[ j ] = ggj[ j ] || ( gpj[ j ] && gcj[ j - 1 ] ) ;
     }
 
-    PrintArray( gcj , ngroups , "gcj" ) ;
+    // PrintArray( gcj , ngroups , "gcj" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -398,7 +401,7 @@ int ComputeCi(){
             ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i - 1 ] ) ;
     }
 
-    PrintArray( ci , bits , "ci" ) ;
+    // PrintArray( ci , bits , "ci" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -410,7 +413,7 @@ int ComputeSumi() {
         else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
     }
 
-    PrintArray( sumi , bits , "sumi" ) ;
+    // PrintArray( sumi , bits , "sumi" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -425,11 +428,3 @@ int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) 
 
     return EXIT_SUCCESS ;
 }
-
-
-
-
-
-
-
-
