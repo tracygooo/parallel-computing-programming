@@ -268,7 +268,7 @@ int ConvertBinaryToHex() {
 }
 
 /************************************************
- Calculate g_i and p_i for all 4100 bits i
+ 1. Calculate g_i and p_i for all 4100 bits i
 ************************************************/
 int ComputeGiPi(){ 
     int i ;
@@ -284,7 +284,7 @@ int ComputeGiPi(){
 }
 
 /************************************************
- Calculate gg_j and gp_j for all 512 groups j 
+ 2. Calculate gg_j and gp_j for all 512 groups j 
 ************************************************/
 int ComputeGgjGpj(){
     int j ;
@@ -309,7 +309,7 @@ int ComputeGgjGpj(){
 }
 
 /************************************************
- Calculate sg_k and sp_k for all 64 groups k 
+ 3. Calculate sg_k and sp_k for all 64 groups k 
 ************************************************/
 int ComputeSgkSpk(){
     int k ;
@@ -335,7 +335,7 @@ int ComputeSgkSpk(){
 }
 
 /******************************************************
- Calculate ssg_l and ssp_l for all 8 super sections j 
+ 4. Calculate ssg_l and ssp_l for all 8 super sections j 
 ******************************************************/
 int ComputeSsglSspl(){
     int l ;
@@ -361,7 +361,7 @@ int ComputeSsglSspl(){
 }
 
 /******************************************************************************
- Calculate ssc_l using ssg_l and ssp_l for all l super sections and 0 for ssc−1 
+ 5. Calculate ssc_l using ssg_l and ssp_l for all l super sections and 0 for ssc−1 
 ******************************************************************************/
 int ComputeSscl(){
     int l ;
@@ -426,7 +426,7 @@ int ComputeCi(){
         if( i == 0 ) 
             ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
         else if( i % block_size == 0 ) 
-            ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/block_size ] - 1 ) ;
+            ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/block_size -1 ] ) ;
         else 
             ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i - 1 ] ) ;
     }

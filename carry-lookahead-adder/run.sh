@@ -3,8 +3,8 @@
 #echo on
 set -x 
 
-for i in {0..7}
+for i in {0..8}
 do 
-    #./cla < input/t"$i".txt > output/cla/c"$i".txt 
+    ./cla < input/t"$i".txt > output/cla/c"$i".txt 
     diff output/cla/c"$i".txt output/answer/A"$i".txt 
 done
