@@ -1,13 +1,13 @@
 /*
- * C program for a carry-lookahead adder
- * Simulate a 4,096 bit Carry lookahead adder by using 8-bit blocks
+ * C program to parallel the sum of two 4096-bit numbers
+ * Simulate a 4,096 bit Carry lookahead adder (CLA) by using 8-bit blocks
+ * Use a 4,096 bit serial Ripple-carry adder to check the correctness of CLA
  * Jinghua Feng, fengj3@rpi.edu
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 // EXAMPLE DATA STRUCTURE DESIGN AND LAYOUT FOR CLA
 #define input_size 1024
@@ -80,7 +80,10 @@ int main( int argc , char ** agrv ) {
     // Carry-Lookahead Adder Algorithm 
     CarryLookaheadAdder() ;
 
-    // Ripper Carry Adder Algorithm 
+    /*
+     * Ripper Carry Adder Algorithm
+     * Uncomment below command line if like to check serial result of sumi and addition 
+    */
     // RippleCarryAdder() ; 
 
     // Convert binary sumi to hex form 
@@ -107,6 +110,9 @@ int ReadInput() {
     return EXIT_SUCCESS ;
 }
 
+/*****************************************
+ * CLA algorithm
+ ****************************************/
 int CarryLookaheadAdder() {
     ComputeGiPi() ;
     ComputeGgjGpj() ;
@@ -120,13 +126,18 @@ int CarryLookaheadAdder() {
     return EXIT_SUCCESS ;
 }
 
+/*****************************************
+ * Serial ripple alorithm 
+ ****************************************/
 int RippleCarryAdder() {
+    // Get carry-in array ci
     int i ;
     for( i = 0 ; i < bits ; i++ ){
         if( i == 0 ) ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
         else ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i -1 ] ) ;
     }
 
+    // Compute sumi
     for( i = 0 ; i < bits ; i++ ){
         if( i == 0 ) sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ 0 ;
         else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
@@ -203,18 +214,16 @@ int ConvertHexToBinary( const char * hex , int * bin ) {
 }
 
 int ConvertBinaryToHex() {
-    // Change sumi to test whether this function works
-    /*
-    sumi[ 0 ] = 1 ;
-    sumi[ 1 ] = 1 ;
-    sumi[ 2 ] = 1 ;
-    sumi[ 3 ] = 1 ;
-    */
 
-    // i: iter for sumi, j: iter for opt, my_sum: sum of every four bits 
+    /*
+     * i: iter for sumi
+     * j: iter for opt (final output) 
+     * my_sum: sum of every four bits 
+     */
     int i , j , my_sum ;
     i = bits - 1 ;
     j = 0 ;
+
     while( i >= 3 ) 
     {
         // Compute decimal of every four bits 
@@ -227,13 +236,6 @@ int ConvertBinaryToHex() {
         i-- ;
         my_sum += sumi[ i ] ;
         i-- ;
-
-        /*
-        for( k = 0 ; k < 4 ; k ++ ) {
-            my_sum += sumi[ i ] * pow( 2.0 ,  double( 3 - k ) ) ;
-            i-- ;
-        }
-        */
 
         if ( my_sum <= 9 ) opt[ j ] = my_sum  + '0' ;
         else 
@@ -265,6 +267,9 @@ int ConvertBinaryToHex() {
     return EXIT_SUCCESS ;
 }
 
+/************************************************
+ Calculate g_i and p_i for all 4100 bits i
+************************************************/
 int ComputeGiPi(){ 
     int i ;
     for( i = 0 ; i < bits ; i++ ) {
@@ -278,6 +283,9 @@ int ComputeGiPi(){
     return EXIT_SUCCESS ;
 }
 
+/************************************************
+ Calculate gg_j and gp_j for all 512 groups j 
+************************************************/
 int ComputeGgjGpj(){
     int j ;
     int i ;
@@ -300,6 +308,9 @@ int ComputeGgjGpj(){
     return EXIT_SUCCESS ;
 }
 
+/************************************************
+ Calculate sg_k and sp_k for all 64 groups k 
+************************************************/
 int ComputeSgkSpk(){
     int k ;
     int j ;
@@ -323,19 +334,22 @@ int ComputeSgkSpk(){
     return EXIT_SUCCESS ;
 }
 
+/******************************************************
+ Calculate ssg_l and ssp_l for all 8 super sections j 
+******************************************************/
 int ComputeSsglSspl(){
     int l ;
     int k ;
     for( l = 0 ; l < nsupersections ; l++ ) {
         k = l * 8 ;
         ssgl[ l ] = sgk[ k + 7 ] || (
-                   spk[ k + 7 ] && sgk[ k + 6 ] ) || ( 
-                   spk[ k + 7 ] && spk[ k + 6 ] && sgk[ k + 5 ] ) || (
-                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && sgk[ k + 4 ] ) || (
-                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && sgk[ k + 3 ] ) || (
-                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && sgk[ k + 2 ] ) || (
-                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && sgk[ k + 1 ] ) || (
-                   spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && spk[ k + 1 ] && sgk[ k ] ) ;
+                    spk[ k + 7 ] && sgk[ k + 6 ] ) || ( 
+                    spk[ k + 7 ] && spk[ k + 6 ] && sgk[ k + 5 ] ) || (
+                    spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && sgk[ k + 4 ] ) || (
+                    spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && sgk[ k + 3 ] ) || (
+                    spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && sgk[ k + 2 ] ) || (
+                    spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && sgk[ k + 1 ] ) || (
+                    spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && spk[ k + 1 ] && sgk[ k ] ) ;
 
         sspl[ l ] = spk[ k + 7 ] && spk[ k + 6 ] && spk[ k + 5 ] && spk[ k + 4 ] && spk[ k + 3 ] && spk[ k + 2 ] && spk[ k + 1 ] && spk[ k ] ;
     }
@@ -346,6 +360,9 @@ int ComputeSsglSspl(){
     return EXIT_SUCCESS ;
 }
 
+/******************************************************************************
+ Calculate ssc_l using ssg_l and ssp_l for all l super sections and 0 for ssc−1 
+******************************************************************************/
 int ComputeSscl(){
     int l ;
     for( l = 0 ; l < nsupersections ; l++ ) {
@@ -359,13 +376,18 @@ int ComputeSscl(){
     return EXIT_SUCCESS ;
 }
 
+
+/******************************************************************************
+ 6.Calculate sck using sgk and spk and correct sscl,
+   l = k div 8 as super sectional carry-in for all sections k.
+******************************************************************************/
 int ComputeSck(){
     int k ;
     for( k = 0 ; k < nsections ; k++ ) {
         if( k == 0 ) 
             sck[ k ] = sgk[ k ] || ( spk[ k ] && 0 ) ;
-        //else if( k % block_size == 0 )
-            //sck[ k ] = sgk[ k ] || ( spk[ k ] && sscl[ k/block_size - 1 ] ) ;
+        else if( k % block_size == 0 )
+            sck[ k ] = sgk[ k ] || ( spk[ k ] && sscl[ k/block_size - 1 ] ) ;
         else 
             sck[ k ] = sgk[ k ] || ( spk[ k ] && sck[ k - 1 ] ) ;
     }
@@ -374,13 +396,17 @@ int ComputeSck(){
     return EXIT_SUCCESS ;
 }
 
+/******************************************************************************
+ 7. Calculate gcj using ggj, gpj and correct sck, 
+    k = j div 8 as sectional carry-in for all groups j
+******************************************************************************/
 int ComputeGcj(){
     int j ;
     for( j = 0 ; j < ngroups ; j++ ) {
         if( j == 0 ) 
             gcj[ j ] = ggj[ j ] || ( gpj[ j ] && 0 ) ;
-        //else if( j % block_size == 0 ) 
-        //    gcj[ j ] = ggj[ j ] || ( gpj[ j ] && sck[ j/block_size - 1 ] ) ;
+        else if( j % block_size == 0 ) 
+            gcj[ j ] = ggj[ j ] || ( gpj[ j ] && sck[ j/block_size - 1 ] ) ;
         else 
             gcj[ j ] = ggj[ j ] || ( gpj[ j ] && gcj[ j - 1 ] ) ;
     }
@@ -390,13 +416,17 @@ int ComputeGcj(){
     return EXIT_SUCCESS ;
 }
 
+/******************************************************************************
+ 8.Calculate ci using gi, pi and correct gcj, 
+   j = i div 8 as group carry-in for all bits i
+******************************************************************************/
 int ComputeCi(){
     int i ;
     for( i = 0 ; i < bits ; i++ ) {
         if( i == 0 ) 
             ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
-        //else if( i % block_size == 0 ) 
-        //    ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/block_size ] - 1 ) ;
+        else if( i % block_size == 0 ) 
+            ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/block_size ] - 1 ) ;
         else 
             ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i - 1 ] ) ;
     }
@@ -406,6 +436,9 @@ int ComputeCi(){
     return EXIT_SUCCESS ;
 }
 
+/******************************************************************************
+ 9. Calculate sumi using a_i xor b_i xor c_i−1 for all i 
+******************************************************************************/
 int ComputeSumi() {
     int i ;
     for( i = 0 ; i < bits ; i++ ){
@@ -418,6 +451,10 @@ int ComputeSumi() {
     return EXIT_SUCCESS ;
 }
 
+
+/****************************************
+ Print out array of int
+****************************************/
 int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) {
     printf( "%s:\n" , arr_name ) ;
     int i ;
