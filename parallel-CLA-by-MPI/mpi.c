@@ -28,19 +28,19 @@ char HEX_OUTPUT[ MY_INPUT_SIZE + 1 ] ;
 
 int ReadInput( const char * fname ) ; 
 int WriteOutput( const char * fname ) ;
-int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits ) ;
-int RippleCarryAdder() ;
+int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , int * sumi ) ;
+int RippleCarryAdder( const int * gi , const int * pi , const int bits , int * sumi ) ;
 int ConvertHexToBinary( const char * hex , int * bin ) ;
 int ComputeGiPi( const int * bin1 , const int * bin2 , const int bits , int * gi , int * pi ) ;
 int ComputeGgjGpj( const int * gi , const int * pi , const int ngroups , int * ggj , int * gpj ) ;
 int ComputeSgkSpk( const int * ggj , const int * gpj , const int nsections , int * sgk , int * spk ) ;
 int ComputeSsglSspl( const int * sgk , const int * spk , const int nsupersections , int * ssgl , int * sspl ) ;
 int ComputeSscl( const int * ssgl , const int * sspl , int * sscl ) ;
-int ComputeSck( const int * sgk , const int * spk , const * sscl , int * sck ) ;
+int ComputeSck( const int * sgk , const int * spk , const int * sscl , int * sck ) ;
 int ComputeGcj( const int * ggj , const int * gpj , const int * sck , int * gcj ) ;
 int ComputeCi( const int * gi , const int * pi , const int * gcj , int * ci ) ;
-int ComputeSumi( const int * bin1 , const int * bin2 , const int * bits , int * sumi ) ;
-int ConvertBinaryToHex() ;
+int ComputeSumi( const int * bin1 , const int * bin2 , const int * ci , int * sumi ) ;
+int ConvertBinaryToHex( const int * sumi ) ;
 int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) ;
 
 int main( int argc , char ** argv ) {
@@ -62,21 +62,22 @@ int main( int argc , char ** argv ) {
     ReadInput( argv[ 1 ] ) ;
 
      // Convert hex to binary and revert binary 
-    ConvertHexToBinary( HEX_INPUT_A , bin1 ) ;
-    ConvertHexToBinary( HEX_INPUT_B , bin2 ) ;
+    ConvertHexToBinary( HEX_INPUT_A , BIN1 ) ;
+    ConvertHexToBinary( HEX_INPUT_B , BIN2 ) ;
     // PrintArray( bin1 , BITS , "bin1" ) ; 
     // PrintArray( bin2 , BITS , "bin2" ) ; 
 
     // Carry-Lookahead Adder Algorithm 
-    CarryLookaheadAdder( BIN1 , BIN2 , BITS ) ; 
+    int SUMI[ BITS ] ;
+    //CarryLookaheadAdder( BIN1 , BIN2 , BITS , SUMI ) ; 
 
     /* 
      * Ripper Carry Adder Algorithm * Uncomment below command line if like to check serial result of sumi and addition 
      */
-    // RippleCarryAdder() ; 
+    RippleCarryAdder( BIN1 , BIN2 , BITS , SUMI ) ; 
 
     // Convert binary sumi to hex form 
-    ConvertBinaryToHex() ; 
+    ConvertBinaryToHex( SUMI ) ; 
 
     WriteOutput( argv[ 2 ] ) ;
 
@@ -93,8 +94,8 @@ int ReadInput( const char * fname ) {
     }
     fscanf( file , "%s %s" , HEX_INPUT_A , HEX_INPUT_B ) ;
 
-    printf( "hex1:\n%s\n\n" , HEX_INPUT_A ) ;
-    printf( "hex2:\n%s\n\n" , HEX_INPUT_B ) ;
+    // printf( "hex1:\n%s\n\n" , HEX_INPUT_A ) ;
+    // printf( "hex2:\n%s\n\n" , HEX_INPUT_B ) ;
     fclose( file ) ;
 
     return EXIT_SUCCESS ;
@@ -116,63 +117,71 @@ int WriteOutput( const char * fname ) {
 /*****************************************
  * CLA algorithm
  ****************************************/
-int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits ) {
+int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , int * sumi ) {
     //Do not touch these defines
     //#define digits (input_size+1)
     int ngroups = bits / BLOCK_SIZE ;
     int nsections = ngroups / BLOCK_SIZE ;
     int nsupersections = nsections / BLOCK_SIZE ;
 
-    int ci[ bits ] = {0};
-    int gi[ bits ] = {0};
-    int pi[ bits ] = {0};
+    int ci[ bits ] ;
+    int gi[ bits ] ;
+    int pi[ bits ] ;
 
-    int ggj[ngroups] = {0};
-    int gpj[ngroups] = {0};
-    int gcj[ngroups] = {0};
+    int ggj[ngroups] ;
+    int gpj[ngroups] ;
+    int gcj[ngroups] ;
 
-    int sgk[nsections] = {0};
-    int spk[nsections] = {0};
-    int sck[nsections] = {0};
+    int sgk[nsections] ;
+    int spk[nsections] ;
+    int sck[nsections] ;
 
-    int ssgl[nsupersections] = {0} ;
-    int sspl[nsupersections] = {0} ;
-    int sscl[nsupersections] = {0} ;
-
-    int sumi[BITS] = {0};
-
+    int ssgl[nsupersections] ;
+    int sspl[nsupersections] ;
+    int sscl[nsupersections] ;
 
     ComputeGiPi( bin1 , bin2 , bits , gi , pi ) ;
     ComputeGgjGpj( gi , pi , ngroups , ggj , gpj ) ;
-    ComputeSgkSpk( ggj , gpj , nsections , spk , spk ) ;
-    ComputeSsglSspl() ;
-    ComputeSscl() ;
-    ComputeSck() ;
-    ComputeGcj() ;
-    ComputeCi() ;
-    ComputeSumi() ;
+    ComputeSgkSpk( ggj , gpj , nsections , sgk , spk ) ;
+    ComputeSsglSspl( sgk , spk , nsupersections , ssgl , sspl ) ;
+    ComputeSscl( ssgl , sspl , sscl ) ;
+    ComputeSck( sgk , spk , sscl , sck ) ;
+    ComputeGcj( ggj , gpj , sck , gcj ) ;
+    ComputeCi( gi , pi , gcj , ci ) ;
+    ComputeSumi( bin1 , bin2 , ci , sumi ) ;
+
     return EXIT_SUCCESS ;
 }
 
 /*****************************************
  * Serial ripple alorithm 
  ****************************************/
-int RippleCarryAdder() {
-    // Get carry-in array ci
+int RippleCarryAdder( const int * bin1 , const int * bin2 , const int bits , int * sumi ) {
     int i ;
-    for( i = 0 ; i < BITS ; i++ ){
+
+    // Compute gi and pi
+    int gi[ bits ] ; 
+    int pi[ bits ] ;
+    for( i = 0 ; i < bits ; i++ ) {
+        gi[ i ] = bin1[ i ] && bin2[ i ] ;
+        pi[ i ] = bin1[ i ] || bin2[ i ] ; 
+    }
+
+    // Get carry-in array ci
+    int ci[ bits ] ;
+    for( i = 0 ; i < bits ; i++ ){
         if( i == 0 ) ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
         else ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i -1 ] ) ;
     }
 
     // Compute sumi
-    for( i = 0 ; i < BITS ; i++ ){
+    for( i = 0 ; i < bits ; i++ ){
         if( i == 0 ) sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ 0 ;
         else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
     }
 
     // PrintArray( ci , BITS , "ripple ci" ) ;
-    // PrintArray( sumi , BITS , "ripple sumi" ) ;
+    PrintArray( sumi , BITS , "ripple sumi" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -241,7 +250,7 @@ int ConvertHexToBinary( const char * hex , int * bin ) {
     return EXIT_SUCCESS ;
 }
 
-int ConvertBinaryToHex() {
+int ConvertBinaryToHex( const int * sumi ) {
 
     /*
      * i: iter for sumi
@@ -432,7 +441,8 @@ int ComputeSsglSspl( const int * sgk , const int * spk , const int nsupersection
  5. Calculate ssc_l using ssg_l and ssp_l for all l super sections and 0 for ssc−1 
 ******************************************************************************/
 int ComputeSscl( const int * ssgl , const int * sspl , int * sscl ){
-    int l ;
+    int l , nsupersections ; 
+    nsupersections = sizeof( sspl ) / sizeof( sspl[0] ) ;
     for( l = 0 ; l < nsupersections ; l++ ) {
         if( l == 0 ) 
             sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
@@ -449,8 +459,9 @@ int ComputeSscl( const int * ssgl , const int * sspl , int * sscl ){
  6.Calculate sck using sgk and spk and correct sscl,
    l = k div BLOCK_SIZE as super sectional carry-in for all sections k.
 ******************************************************************************/
-int ComputeSck( const int * sgk , const int * spk , const * sscl , int * sck ) {
-    int k ;
+int ComputeSck( const int * sgk , const int * spk , const int * sscl , int * sck ) {
+    int k , nsections ;
+    nsections = sizeof( spk ) / sizeof( spk[0] ) ;
     for( k = 0 ; k < nsections ; k++ ) {
         if( k == 0 ) 
             sck[ k ] = sgk[ k ] || ( spk[ k ] && 0 ) ;
@@ -469,7 +480,8 @@ int ComputeSck( const int * sgk , const int * spk , const * sscl , int * sck ) {
     k = j div BLOCK_SIZE as sectional carry-in for all groups j
 ******************************************************************************/
 int ComputeGcj( const int * ggj , const int * gpj , const int * sck , int * gcj ) {
-    int j ;
+    int j , ngroups ;
+    ngroups = sizeof( gpj ) / sizeof( gpj[0] ) ;
     for( j = 0 ; j < ngroups ; j++ ) {
         if( j == 0 ) 
             gcj[ j ] = ggj[ j ] || ( gpj[ j ] && 0 ) ;
@@ -507,8 +519,9 @@ int ComputeCi( const int * gi , const int * pi , const int * gcj , int * ci ) {
 /******************************************************************************
  9. Calculate sumi using a_i xor b_i xor c_i−1 for all i 
 ******************************************************************************/
-int ComputeSumi( const int * bin1 , const int * bin2 , const int * bits , int * sumi ) {
-    int i ;
+int ComputeSumi( const int * bin1 , const int * bin2 , const int * ci , int * sumi ) {
+    int i , bits ;
+    bits = sizeof( bin1 ) / sizeof( bin1[0] ) ;
     for( i = 0 ; i < bits ; i++ ){
         if( i == 0 ) sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ 0 ;
         else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
