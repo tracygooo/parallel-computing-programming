@@ -8,50 +8,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <mpi.h>
+#include <mpi.h>
 
 // EXAMPLE DATA STRUCTURE DESIGN AND LAYOUT FOR CLA
 #define MY_INPUT_SIZE 262144
+#define BITS MY_INPUT_SIZE * 4
 #define BLOCK_SIZE 32 
-#define BITS MY_INPUT_SIZE*4
 
-// Add 1 to array size because strings must be null terminated
-char HEX_INPUT_A[ MY_INPUT_SIZE + 1 ] = {0};
-char HEX_INPUT_B[ MY_INPUT_SIZE + 1 ] = {0};
-
-//Integer array of inputs in binary form
-//int BITS = MY_INPUT_SIZE*4 ;
-int BIN1[ BITS ];
-int BIN2[ BITS ];
-
-//Character array for outputs in hex form
-char HEX_OUTPUT[ MY_INPUT_SIZE + 1 ] ;
-
-int ReadInput( const char * fname ) ; 
-int WriteOutput( const char * fname ) ;
-int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , int * sumi ) ;
+int ReadInput( const char * fname  , char * hex_input_a , char * hex_input_b ) ;
+int WriteOutput( const char * fname , const char * hex_output ) ;
+int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , 
+                         const int mpi_size , const int rank , const int ss_carry_in , MPI_Request * request , int * sumi ) ;
 int RippleCarryAdder( const int * gi , const int * pi , const int bits , int * sumi ) ;
 int ConvertHexToBinary( const char * hex , int * bin ) ;
 int ComputeGiPi( const int * bin1 , const int * bin2 , const int bits , int * gi , int * pi ) ;
 int ComputeGgjGpj( const int * gi , const int * pi , const int ngroups , int * ggj , int * gpj ) ;
 int ComputeSgkSpk( const int * ggj , const int * gpj , const int nsections , int * sgk , int * spk ) ;
 int ComputeSsglSspl( const int * sgk , const int * spk , const int nsupersections , int * ssgl , int * sspl ) ;
-int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections , int * sscl ) ;
+int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections , 
+                 const int mpi_size , const int rank , const int carry_in , MPI_Request * request , int * sscl );
 int ComputeSck( const int * sgk , const int * spk , const int * sscl , const int nsections , int * sck ) ;
 int ComputeGcj( const int * ggj , const int * gpj , const int * sck , const int ngroups , int * gcj ) ;
 int ComputeCi( const int * gi , const int * pi , const int * gcj , const int bits , int * ci ) ;
 int ComputeSumi( const int * bin1 , const int * bin2 , const int bits , const int * ci , int * sumi ) ;
-int ConvertBinaryToHex( const int * sumi ) ;
+int ConvertBinaryToHex( const int * sumi , const int bits , char * hex_output ) ;
 int PrintArray( const int * arr  , const int arr_size , const char * arr_name ) ;
 
 int main( int argc , char ** argv ) {
-    /*
+
     int my_mpi_size = -1;
     int my_mpi_rank = -1;
+
+    // Char array of inputs in hex form
+    char * HEX_INPUT_A ;
+    char * HEX_INPUT_B ;
+
+    // Integer array of inputs in binary form
+    int * BIN1 ;
+    int * BIN2 ;
+    int * SUMI ;
+    
+    int chunk_size ; 
+
+    // Character array for outputs in hex form
+    char * HEX_OUTPUT ;
+
     MPI_Init( &argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &my_mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_mpi_rank);
-    */
+
+    chunk_size = BITS / my_mpi_size ;
+    int * local_bin1 = ( int * ) malloc( chunk_size * sizeof( int ) ) ;
+    int * local_bin2 = ( int * ) malloc( chunk_size * sizeof( int ) ) ;
+    int * local_sum = ( int * ) malloc( chunk_size * sizeof( int ) ) ;
 
     // ./a.out input.txt output.txt
     if( argc != 3 )
@@ -60,42 +69,87 @@ int main( int argc , char ** argv ) {
         exit( EXIT_FAILURE ) ;
     }
 
-    ReadInput( argv[ 1 ] ) ;
+    if( 0 == my_mpi_rank ) {
 
-     // Convert hex to binary and revert binary 
-    ConvertHexToBinary( HEX_INPUT_A , BIN1 ) ;
-    ConvertHexToBinary( HEX_INPUT_B , BIN2 ) ;
-    // PrintArray( BIN1 , BITS , "bin1" ) ; 
-    // PrintArray( BIN2 , BITS , "bin2" ) ; 
+        // Add 1 to array size because strings must be null terminated
+        HEX_INPUT_A = ( char * ) malloc( MY_INPUT_SIZE + 1 ) ;
+        HEX_INPUT_B = ( char * ) malloc( MY_INPUT_SIZE + 1 ) ;
 
-    // Carry-Lookahead Adder Algorithm 
-    int * SUMI = ( int * ) malloc( BITS * sizeof( int ) ) ;
-    CarryLookaheadAdder( BIN1 , BIN2 , BITS , SUMI ) ; 
+        //Integer array of inputs in binary form
+        BIN1 = ( int * ) malloc( BITS * sizeof( int ) );
+        BIN2 = ( int * ) malloc( BITS * sizeof( int ) );
+        SUMI = ( int * ) malloc( BITS * sizeof( int ) );
 
-    /* 
-     * Ripper Carry Adder Algorithm * Uncomment below command line if like to check serial result of sumi and addition 
-     */
-    //RippleCarryAdder( BIN1 , BIN2 , bits , SUMI ) ; 
-    //RippleCarryAdder( BIN1 , BIN2 , BITS , SUMI ) ; 
+        //Character array for outputs in hex form
+        HEX_OUTPUT = ( char * ) malloc( MY_INPUT_SIZE + 1 ) ;
 
-    // Convert binary sumi to hex form 
-    ConvertBinaryToHex( SUMI ) ;
+        ReadInput( argv[ 1 ] , HEX_INPUT_A , HEX_INPUT_B ) ;
 
-    WriteOutput( argv[ 2 ] ) ;
+        // Convert hex to binary and revert binary 
+        ConvertHexToBinary( HEX_INPUT_A , BIN1 ) ;
+        ConvertHexToBinary( HEX_INPUT_B , BIN2 ) ;
+        //PrintArray( BIN1 , BITS , "bin1" ) ; 
+        //PrintArray( BIN2 , BITS , "bin2" ) ; 
+        
+        //MPI_Scatter( BIN1 + my_mpi_rank * chunk_size , chunk_size , MPI_INT, 
+        //             local_bin1 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
 
-    //MPI_Finalize();
-    free( SUMI ) ;
+        MPI_Scatter( BIN1 , chunk_size , MPI_INT, local_bin1 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
+        MPI_Scatter( BIN2 , chunk_size , MPI_INT, local_bin2 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
+
+        PrintArray(  local_bin1 , chunk_size , "Master local_bin1" ) ; 
+        PrintArray(  local_bin2 , chunk_size , "Master local_bin2" ) ; 
+        // Convert binary sumi to hex form 
+        ConvertBinaryToHex( SUMI , BITS  , HEX_OUTPUT ) ;
+        WriteOutput( argv[ 2 ] , HEX_OUTPUT ) ;
+
+        free( BIN1 ) ;
+        free( BIN2 ) ;
+        free( SUMI ) ;
+        free( HEX_INPUT_A ) ;
+        free( HEX_INPUT_B ) ;
+        free( HEX_OUTPUT ) ;
+    }
+    else {
+        MPI_Scatter( BIN1 , chunk_size , MPI_INT, local_bin1 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
+        MPI_Scatter( BIN2 , chunk_size , MPI_INT, local_bin2 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
+
+        printf( "Rank: %d\n" , my_mpi_rank ) ;
+        PrintArray(  local_bin1 , chunk_size , "Worker local_bin1" ) ; 
+        PrintArray(  local_bin2 , chunk_size , "Worker local_bin2" ) ; 
+
+        int ss_carry_in ;
+        MPI_Request irecv_request ;
+        MPI_Irecv( & ss_carry_in , 1 , MPI_INT , my_mpi_rank - 1 , 0 , MPI_COMM_WORLD , & irecv_request ) ;
+
+        // Carry-Lookahead Adder Algorithm 
+        CarryLookaheadAdder( local_bin1 , local_bin2 , chunk_size , 
+                             my_mpi_size , my_mpi_rank , ss_carry_in , & irecv_request , local_sum ) ;
+
+        MPI_Gather( local_sum , chunk_size , MPI_INT ,
+                    SUMI , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
+        
+        free( local_bin1 ) ;
+        free( local_bin2 ) ;
+        free( local_sum ) ;
+    }
+
+    // Ripper Carry Adder Algorithm * Uncomment below command line if like to check serial result of sumi and addition 
+    // RippleCarryAdder( BIN1 , BIN2 , BITS , SUMI ) ; 
+
+    MPI_Finalize();
+
     return EXIT_SUCCESS ;
 }
 
-int ReadInput( const char * fname ) { 
+int ReadInput( const char * fname  , char * hex_input_a , char * hex_input_b ) { 
 
     FILE * file ;
     if( ( file = fopen( fname , "r" ) ) == NULL ) {
         printf( "Failed to open input data file: %s\n" , fname ) ;
         exit( EXIT_FAILURE ) ;
     }
-    fscanf( file , "%s %s" , HEX_INPUT_A , HEX_INPUT_B ) ;
+    fscanf( file , "%s %s" , hex_input_a , hex_input_b ) ;
 
     // printf( "hex1:\n%s\n\n" , HEX_INPUT_A ) ;
     // printf( "hex2:\n%s\n\n" , HEX_INPUT_B ) ;
@@ -104,14 +158,14 @@ int ReadInput( const char * fname ) {
     return EXIT_SUCCESS ;
 }
 
-int WriteOutput( const char * fname ) { 
+int WriteOutput( const char * fname , const char * hex_output ) { 
 
     FILE * file ;
     if( ( file = fopen( fname , "w" ) ) == NULL ) {
         printf( "Failed to open output data file: %s\n" , fname ) ;
         exit( EXIT_FAILURE ) ;
     }
-    fprintf( file , "%s\n" , HEX_OUTPUT ) ;
+    fprintf( file , "%s\n" , hex_output ) ;
     fclose( file ) ;
 
     return EXIT_SUCCESS ;
@@ -120,9 +174,8 @@ int WriteOutput( const char * fname ) {
 /*****************************************
  * CLA algorithm
  ****************************************/
-int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , int * sumi ) {
-    //Do not touch these defines
-    //#define digits (input_size+1)
+int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , 
+                         const int mpi_size , const int rank , const int ss_carry_in , MPI_Request * request , int * sumi ) {
     int ngroups = bits / BLOCK_SIZE ;
     int nsections = ngroups / BLOCK_SIZE ;
     int nsupersections = nsections / BLOCK_SIZE ;
@@ -147,7 +200,7 @@ int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , 
     ComputeGgjGpj( gi , pi , ngroups , ggj , gpj ) ;
     ComputeSgkSpk( ggj , gpj , nsections , sgk , spk ) ;
     ComputeSsglSspl( sgk , spk , nsupersections , ssgl , sspl ) ;
-    ComputeSscl( ssgl , sspl , nsupersections , sscl ) ;
+    ComputeSscl( ssgl , sspl , nsupersections , mpi_size , rank , ss_carry_in , request , sscl ) ;
     ComputeSck( sgk , spk , sscl , nsections , sck ) ;
     ComputeGcj( ggj , gpj , sck , ngroups , gcj ) ;
     ComputeCi( gi , pi , gcj , bits , ci ) ;
@@ -274,11 +327,11 @@ int ConvertHexToBinary( const char * hex , int * bin ) {
     return EXIT_SUCCESS ;
 }
 
-int ConvertBinaryToHex( const int * sumi ) {
+int ConvertBinaryToHex( const int * sumi , const int bits , char * hex_output ) {
 
     /*
      * i: iter for sumi
-     * j: iter for HEX_OUTPUT (final output) 
+     * j: iter for hex_output (final output) 
      * my_sum: sum of every four bits 
      */
     int i , j , my_sum ;
@@ -298,22 +351,22 @@ int ConvertBinaryToHex( const int * sumi ) {
         my_sum += sumi[ i ] ;
         i-- ;
 
-        if ( my_sum <= 9 ) HEX_OUTPUT[ j ] = my_sum  + '0' ;
+        if ( my_sum <= 9 ) hex_output[ j ] = my_sum  + '0' ;
         else 
         {
             switch( my_sum ) {
                 case 10 :
-                    HEX_OUTPUT[ j ] = 'A' ; break ;
+                    hex_output[ j ] = 'A' ; break ;
                 case 11 :
-                    HEX_OUTPUT[ j ] = 'B' ; break ;
+                    hex_output[ j ] = 'B' ; break ;
                 case 12 :
-                    HEX_OUTPUT[ j ] = 'C' ; break ;
+                    hex_output[ j ] = 'C' ; break ;
                 case 13 :
-                    HEX_OUTPUT[ j ] = 'D' ; break ;
+                    hex_output[ j ] = 'D' ; break ;
                 case 14 :
-                    HEX_OUTPUT[ j ] = 'E' ; break ;
+                    hex_output[ j ] = 'E' ; break ;
                 case 15 :
-                    HEX_OUTPUT[ j ] = 'F' ; break ;
+                    hex_output[ j ] = 'F' ; break ;
                 default :
                     printf( "Invalid hex number...\n" ) ;
                     return EXIT_FAILURE ;
@@ -323,9 +376,9 @@ int ConvertBinaryToHex( const int * sumi ) {
         j++ ;
     }
 
-    // printf( "Addition:\n%s\n\n" , HEX_OUTPUT ) ;
-    HEX_OUTPUT[ MY_INPUT_SIZE ] = '\0' ; 
-    printf( "%s\n" , HEX_OUTPUT ) ;
+    // printf( "Addition:\n%s\n\n" , hex_output ) ;
+    hex_output[ MY_INPUT_SIZE ] = '\0' ; 
+    //printf( "%s\n" , hex_output ) ;
     return EXIT_SUCCESS ;
 }
 
@@ -464,15 +517,31 @@ int ComputeSsglSspl( const int * sgk , const int * spk , const int nsupersection
 /******************************************************************************
  5. Calculate ssc_l using ssg_l and ssp_l for all l super sections and 0 for ssc−1 
 ******************************************************************************/
-int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections , int * sscl ){
+int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections , 
+                 const int mpi_size , const int rank , const int carry_in , MPI_Request * request , int * sscl ){
     int l ; 
+    MPI_Status irecv_status ;
     for( l = 0 ; l < nsupersections ; l++ ) {
-        if( l == 0 ) 
-            sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
+        if( l == 0 ) { 
+            if( rank == 0 )
+                sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
+            else {
+                MPI_Wait( request , & irecv_status ) ;
+                sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && carry_in ) ;
+            }
+        }
         else 
             sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && sscl[ l - 1 ] ) ;
     }
     // PrintArray( sscl , nsupersections , "sscl" ) ;
+
+    /*================================================================================= 
+     * For example, if mpi_size = 32, execute MPI_Isend when rank = 0, 1, ..., 30
+     * When rank = 31, only execute MPI_Irecv 
+     * Send the last integer of array sscl to next rank 
+     *================================================================================= */
+    if( rank <  mpi_size - 1 )
+        MPI_Isend( sscl + nsupersections - 1 , 1 , MPI_INT , rank + 1 , 0 , MPI_COMM_WORLD , request ) ;
 
     return EXIT_SUCCESS ;
 }
