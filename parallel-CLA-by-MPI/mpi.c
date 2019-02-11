@@ -18,8 +18,10 @@
 
 int ReadInput( const char * fname  , char * hex_input_a , char * hex_input_b ) ;
 int WriteOutput( const char * fname , const char * hex_output ) ;
-int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , 
-                         const int mpi_size , const int rank , const int ss_carry_in , MPI_Request * request , int * sumi ) ;
+
+int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , const int mpi_size , const int rank , 
+                         const int ss_carry_in , const int barrier ,  MPI_Request * request , int * sumi ) ;
+
 int RippleCarryAdder( const int * gi , const int * pi , const int bits , int * sumi ) ;
 int ConvertHexToBinary( const char * hex , int * bin ) ;
 int ComputeGiPi( const int * bin1 , const int * bin2 , const int bits , const int rank , int * gi , int * pi ) ;
@@ -38,8 +40,13 @@ int PrintArrayWithRank( const int * arr  , const int arr_size , const char * arr
 
 int main( int argc , char ** argv ) {
 
-    int my_mpi_size = -1;
-    int my_mpi_rank = -1;
+    int my_mpi_size = -1 ;
+    int my_mpi_rank = -1 ;
+
+    // 0: turn on MPI_Barrier, nonzero: turn off MPI_Barrier
+    int barrier = 0 ;
+
+    double start_time , finish_time ;
 
     // Char array of inputs in hex form
     char * HEX_INPUT_A ;
@@ -114,6 +121,7 @@ int main( int argc , char ** argv ) {
     /*=========================================================================
      * All ranks: Scatter BIN1 and BIN2 into equal chunks for each rank 
      *========================================================================*/
+    start_time = MPI_Wtime() ;
     MPI_Scatter( BIN1 , chunk_size , MPI_INT , local_bin1 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
     MPI_Scatter( BIN2 , chunk_size , MPI_INT , local_bin2 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
     PrintArrayWithRank(  local_bin1 , chunk_size , "local_bin1" , my_mpi_rank ) ; 
@@ -126,14 +134,14 @@ int main( int argc , char ** argv ) {
     if( 0 == my_mpi_rank ) {
         free( BIN1 ) ;
         free( BIN2 ) ;
-        //SUMI = ( int * ) malloc( BITS * sizeof( int ) );
+        SUMI = ( int * ) malloc( BITS * sizeof( int ) );
     }
 
 
     /*=========================================================================
      * All Ranks: Run Carry-Lookahead Adder Algorithm 
      *========================================================================*/
-    /*
+    ///*
     if( 0 == my_mpi_rank ) ss_carry_in = 0 ; 
 
     else {
@@ -141,10 +149,14 @@ int main( int argc , char ** argv ) {
     }
 
     CarryLookaheadAdder( local_bin1 , local_bin2 , chunk_size , 
-                         my_mpi_size , my_mpi_rank , ss_carry_in , & irecv_request , local_sum ) ;
+                         my_mpi_size , my_mpi_rank , ss_carry_in , barrier , & irecv_request , local_sum ) ;
 
     MPI_Gather( local_sum , chunk_size , MPI_INT , SUMI , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
-    */
+
+    finish_time = MPI_Wtime() ;
+
+    printf( "Execution time: %lf\n" , finish_time - start_time ) ;
+   // */
 
     /*=========================================================================
      * Rank 0: 
@@ -152,7 +164,7 @@ int main( int argc , char ** argv ) {
      *    (2) Write hex SUMI to output file "argv[2]"
      *    (3) Free SUMI and HEX_OUTPUT in rank 0
      *========================================================================*/
-    /*
+    ///*
     if( 0 == my_mpi_rank ) {
         HEX_OUTPUT = ( char * ) malloc( MY_INPUT_SIZE + 1 ) ;
         // Convert binary sumi to hex form 
@@ -162,7 +174,7 @@ int main( int argc , char ** argv ) {
         free( SUMI ) ;
         free( HEX_OUTPUT ) ;
     }
-    */
+   // */
 
     // Ripper Carry Adder Algorithm * Uncomment below command line if like to check serial result of sumi and addition 
     // RippleCarryAdder( BIN1 , BIN2 , BITS , SUMI ) ; 
@@ -206,11 +218,20 @@ int WriteOutput( const char * fname , const char * hex_output ) {
     return EXIT_SUCCESS ;
 }
 
-/*****************************************
+/***************************************************************************
  * CLA algorithm
- ****************************************/
+ *
+ *      ss_carry_in:  
+ *          Rank 0: 0; Rank1: sent from Rank 0; Rank 2: sent from Rank 1; ...   
+ *
+ *      request:
+ *          Pass Irecv status to check whether it is valid to acccess ss_carry_in
+ *
+ *      barrier: add MPI_Barrier or not
+ *          zero: Yes; nonzero: No
+ ******************************************************************************/
 int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , 
-                         const int mpi_size , const int rank , const int ss_carry_in , MPI_Request * request , int * sumi ) {
+                         const int mpi_size , const int rank , const int ss_carry_in , const int barrier ,  MPI_Request * request , int * sumi ) {
     int ngroups = bits / BLOCK_SIZE ;
     int nsections = ngroups / BLOCK_SIZE ;
     int nsupersections = nsections / BLOCK_SIZE ;
@@ -232,14 +253,32 @@ int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits ,
     int * sscl = ( int * ) malloc( nsupersections * sizeof( int ) ) ;
 
     ComputeGiPi( bin1 , bin2 , bits , rank , gi , pi ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
     ComputeGgjGpj( gi , pi , ngroups , ggj , gpj ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
     ComputeSgkSpk( ggj , gpj , nsections , sgk , spk ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
     ComputeSsglSspl( sgk , spk , nsupersections , ssgl , sspl ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
     ComputeSscl( ssgl , sspl , nsupersections , mpi_size , rank , ss_carry_in , request , sscl ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
     ComputeSck( sgk , spk , sscl , nsections , sck ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
     ComputeGcj( ggj , gpj , sck , ngroups , gcj ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
     ComputeCi( gi , pi , gcj , bits , ci ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
     ComputeSumi( bin1 , bin2 , bits , ci , sumi ) ;
+    if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+
 
     free( gi ) ;
     free( pi ) ;
