@@ -19,7 +19,7 @@ int main()
     int * a = NULL;
     int i;
     int local_a[6] ;
-    int local_n = 2;
+    int local_n ;
     int n = 6;
     int my_rank ;
     int my_mpi_size ;
@@ -27,6 +27,7 @@ int main()
     MPI_Init( NULL , NULL );
     MPI_Comm_size(MPI_COMM_WORLD, &my_mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank); 
+    local_n = n / my_mpi_size ;
 
     if (my_rank == 0) { 
         a = malloc(n * sizeof(int));
@@ -43,6 +44,9 @@ int main()
         printf( "Rank %d: \n" , my_rank ) ;
         PrintArray( local_a , 2 ) ;
     } 
+
+    MPI_Finalize();
+
     return EXIT_SUCCESS ;
 }
 
