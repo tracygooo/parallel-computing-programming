@@ -15,12 +15,13 @@
 //#define MY_INPUT_SIZE 400 
 #define BITS MY_INPUT_SIZE * 4
 #define BLOCK_SIZE 32 
+int ss_carry_in = 0 ;
 
 int ReadInput( const char * fname  , char * hex_input_a , char * hex_input_b ) ;
 int WriteOutput( const char * fname , const char * hex_output ) ;
 
 int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , const int mpi_size , const int rank , 
-                         const int ss_carry_in , const int barrier ,  MPI_Request * request , int * sumi ) ;
+                         const int barrier ,  MPI_Request * request , int * sumi ) ;
 
 int RippleCarryAdder( const int * gi , const int * pi , const int bits , int * sumi ) ;
 int ConvertHexToBinary( const char * hex , int * bin ) ;
@@ -29,7 +30,7 @@ int ComputeGgjGpj( const int * gi , const int * pi , const int ngroups , int * g
 int ComputeSgkSpk( const int * ggj , const int * gpj , const int nsections , int * sgk , int * spk ) ;
 int ComputeSsglSspl( const int * sgk , const int * spk , const int nsupersections , int * ssgl , int * sspl ) ;
 int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections , 
-                 const int mpi_size , const int rank , const int carry_in , MPI_Request * request , int * sscl );
+                 const int mpi_size , const int rank , MPI_Request * request , int * sscl );
 int ComputeSck( const int * sgk , const int * spk , const int * sscl , const int nsections , int * sck ) ;
 int ComputeGcj( const int * ggj , const int * gpj , const int * sck , const int ngroups , int * gcj ) ;
 int ComputeCi( const int * gi , const int * pi , const int * gcj , const int bits , int * ci ) ;
@@ -44,7 +45,7 @@ int main( int argc , char ** argv ) {
     int my_mpi_rank = -1 ;
 
     // 0: turn on MPI_Barrier, nonzero: turn off MPI_Barrier
-    int barrier = 0 ;
+    int barrier = -1 ;
 
     double start_time , finish_time ;
 
@@ -70,9 +71,8 @@ int main( int argc , char ** argv ) {
     chunk_size = BITS / my_mpi_size ;
     int * local_bin1 = ( int * ) malloc( chunk_size * sizeof( int ) ) ;
     int * local_bin2 = ( int * ) malloc( chunk_size * sizeof( int ) ) ;
-    int * local_sum= ( int * ) malloc( chunk_size * sizeof( int ) ) ;
+    int * local_sum = ( int * ) malloc( chunk_size * sizeof( int ) ) ;
 
-    int ss_carry_in ;
     MPI_Request irecv_request ;
 
     // ./a.out input.txt output.txt
@@ -90,12 +90,12 @@ int main( int argc , char ** argv ) {
      *===================================================================*/
     if( my_mpi_rank == 0 ) {
 
+        // Read input file to HEX_INPUT_A and HEX_INPUT_B 
         HEX_INPUT_A = ( char * ) malloc( MY_INPUT_SIZE + 1 ) ;
         HEX_INPUT_B = ( char * ) malloc( MY_INPUT_SIZE + 1 ) ;
         ReadInput( argv[ 1 ] , HEX_INPUT_A , HEX_INPUT_B ) ;
 
         // Convert hex to binary and revert binary 
-        // Integer array of inputs in binary form
         BIN1 = ( int * ) malloc( BITS * sizeof( int ) );
         BIN2 = ( int * ) malloc( BITS * sizeof( int ) );
         ConvertHexToBinary( HEX_INPUT_A , BIN1 ) ;
@@ -122,10 +122,17 @@ int main( int argc , char ** argv ) {
      * All ranks: Scatter BIN1 and BIN2 into equal chunks for each rank 
      *========================================================================*/
     start_time = MPI_Wtime() ;
+
     MPI_Scatter( BIN1 , chunk_size , MPI_INT , local_bin1 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
     MPI_Scatter( BIN2 , chunk_size , MPI_INT , local_bin2 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
-    PrintArrayWithRank(  local_bin1 , chunk_size , "local_bin1" , my_mpi_rank ) ; 
-    PrintArrayWithRank(  local_bin2 , chunk_size , "local_bin2" , my_mpi_rank ) ; 
+
+    // Check whether data is scattered successfully
+    /*
+    if( my_mpi_rank == 1 ) {
+        PrintArrayWithRank( local_bin1 , chunk_size , "local_bin1" , my_mpi_rank ) ; 
+        PrintArrayWithRank( local_bin2 , chunk_size , "local_bin2" , my_mpi_rank ) ; 
+    }
+    */
 
 
     /*=========================================================================
@@ -142,20 +149,20 @@ int main( int argc , char ** argv ) {
      * All Ranks: Run Carry-Lookahead Adder Algorithm 
      *========================================================================*/
     ///*
-    if( 0 == my_mpi_rank ) ss_carry_in = 0 ; 
-
-    else {
+    if( my_mpi_rank > 0 ){ 
         MPI_Irecv( & ss_carry_in , 1 , MPI_INT , my_mpi_rank - 1 , 0 , MPI_COMM_WORLD , & irecv_request ) ;
+        //MPI_Status irecv_status ;
+        //MPI_Wait( & irecv_request , & irecv_status ) ;
     }
 
     CarryLookaheadAdder( local_bin1 , local_bin2 , chunk_size , 
-                         my_mpi_size , my_mpi_rank , ss_carry_in , barrier , & irecv_request , local_sum ) ;
+                         my_mpi_size , my_mpi_rank , barrier , & irecv_request , local_sum ) ;
 
     MPI_Gather( local_sum , chunk_size , MPI_INT , SUMI , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
 
     finish_time = MPI_Wtime() ;
 
-    printf( "Execution time: %lf\n" , finish_time - start_time ) ;
+    printf( "Execution time: %lf\n\n" , finish_time - start_time ) ;
    // */
 
     /*=========================================================================
@@ -164,7 +171,7 @@ int main( int argc , char ** argv ) {
      *    (2) Write hex SUMI to output file "argv[2]"
      *    (3) Free SUMI and HEX_OUTPUT in rank 0
      *========================================================================*/
-    ///*
+    // /*
     if( 0 == my_mpi_rank ) {
         HEX_OUTPUT = ( char * ) malloc( MY_INPUT_SIZE + 1 ) ;
         // Convert binary sumi to hex form 
@@ -174,7 +181,7 @@ int main( int argc , char ** argv ) {
         free( SUMI ) ;
         free( HEX_OUTPUT ) ;
     }
-   // */
+    // */
 
     // Ripper Carry Adder Algorithm * Uncomment below command line if like to check serial result of sumi and addition 
     // RippleCarryAdder( BIN1 , BIN2 , BITS , SUMI ) ; 
@@ -231,7 +238,7 @@ int WriteOutput( const char * fname , const char * hex_output ) {
  *          zero: Yes; nonzero: No
  ******************************************************************************/
 int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , 
-                         const int mpi_size , const int rank , const int ss_carry_in , const int barrier ,  MPI_Request * request , int * sumi ) {
+                         const int mpi_size , const int rank , const int barrier ,  MPI_Request * request , int * sumi ) {
     int ngroups = bits / BLOCK_SIZE ;
     int nsections = ngroups / BLOCK_SIZE ;
     int nsupersections = nsections / BLOCK_SIZE ;
@@ -252,32 +259,52 @@ int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits ,
     int * sspl = ( int * ) malloc( nsupersections * sizeof( int ) ) ;
     int * sscl = ( int * ) malloc( nsupersections * sizeof( int ) ) ;
 
+    int test_rank = 0 ;
     ComputeGiPi( bin1 , bin2 , bits , rank , gi , pi ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Gi\n") ;
+    
 
     ComputeGgjGpj( gi , pi , ngroups , ggj , gpj ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Ggj\n") ;
 
     ComputeSgkSpk( ggj , gpj , nsections , sgk , spk ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Sgk\n") ;
 
     ComputeSsglSspl( sgk , spk , nsupersections , ssgl , sspl ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Ssgl\n") ;
 
-    ComputeSscl( ssgl , sspl , nsupersections , mpi_size , rank , ss_carry_in , request , sscl ) ;
+    ComputeSscl( ssgl , sspl , nsupersections , mpi_size , rank , request , sscl ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Sscl\n") ;
 
     ComputeSck( sgk , spk , sscl , nsections , sck ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Sck\n") ;
 
     ComputeGcj( ggj , gpj , sck , ngroups , gcj ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Gcj\n") ;
 
     ComputeCi( gi , pi , gcj , bits , ci ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Ci\n") ;
 
     ComputeSumi( bin1 , bin2 , bits , ci , sumi ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
+    if( rank == test_rank ) 
+        printf( "Sumi\n") ;
 
 
     free( gi ) ;
@@ -597,16 +624,18 @@ int ComputeSsglSspl( const int * sgk , const int * spk , const int nsupersection
  5. Calculate ssc_l using ssg_l and ssp_l for all l super sections and 0 for ssc−1 
 ******************************************************************************/
 int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections , 
-                 const int mpi_size , const int rank , const int carry_in , MPI_Request * request , int * sscl ){
+                 const int mpi_size , const int rank , MPI_Request * request , int * sscl ){
+    printf( "Rand %d: ss_carry_in = %d\n" , rank , ss_carry_in ) ;
     int l ; 
     MPI_Status irecv_status ;
+    MPI_Request isend_request ;
     for( l = 0 ; l < nsupersections ; l++ ) {
         if( l == 0 ) { 
             if( rank == 0 )
                 sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && 0 ) ;
             else {
                 MPI_Wait( request , & irecv_status ) ;
-                sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && carry_in ) ;
+                sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && ss_carry_in ) ;
             }
         }
         else 
@@ -614,13 +643,14 @@ int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections 
     }
     // PrintArray( sscl , nsupersections , "sscl" ) ;
 
-    /*================================================================================= 
+    /*
      * For example, if mpi_size = 32, execute MPI_Isend when rank = 0, 1, ..., 30
      * When rank = 31, only execute MPI_Irecv 
      * Send the last integer of array sscl to next rank 
-     *================================================================================= */
-    if( rank <  mpi_size - 1 )
-        MPI_Isend( sscl + nsupersections - 1 , 1 , MPI_INT , rank + 1 , 0 , MPI_COMM_WORLD , request ) ;
+     * If mpi_size <= 1, there is no need to send carry_in
+     */
+    if( rank <  mpi_size - 1 && mpi_size > 1 )
+        MPI_Isend( sscl + nsupersections - 1 , 1 , MPI_INT , rank + 1 , 0 , MPI_COMM_WORLD , & isend_request ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -671,7 +701,7 @@ int ComputeGcj( const int * ggj , const int * gpj , const int * sck , const int 
 ******************************************************************************/
 int ComputeCi( const int * gi , const int * pi , const int * gcj , const int bits , int * ci ) {
     int i ;
-    for( i = 0 ; i < BITS ; i++ ) {
+    for( i = 0 ; i < bits ; i++ ) {
         if( i == 0 ) 
             ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
         else if( i % BLOCK_SIZE == 0 ) 
