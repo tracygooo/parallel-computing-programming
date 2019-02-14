@@ -16,6 +16,7 @@
 #define BITS MY_INPUT_SIZE * 4
 #define BLOCK_SIZE 32 
 int ss_carry_in = 0 ;
+int my_mpi_rank = -1 ;
 
 int ReadInput( const char * fname  , char * hex_input_a , char * hex_input_b ) ;
 int WriteOutput( const char * fname , const char * hex_output ) ;
@@ -41,13 +42,13 @@ int PrintArrayWithRank( const int * arr  , const int arr_size , const char * arr
 
 int main( int argc , char ** argv ) {
 
-    int my_mpi_size = -1 ;
-    int my_mpi_rank = -1 ;
-
     // 0: turn on MPI_Barrier, nonzero: turn off MPI_Barrier
     int barrier = -1 ;
 
-    double start_time , finish_time ;
+    // double start_time , finish_time ;
+
+    int my_mpi_size = -1 ;
+    // int my_mpi_rank = -1 ;
 
     // Char array of inputs in hex form
     char * HEX_INPUT_A ;
@@ -121,7 +122,7 @@ int main( int argc , char ** argv ) {
     /*=========================================================================
      * All ranks: Scatter BIN1 and BIN2 into equal chunks for each rank 
      *========================================================================*/
-    start_time = MPI_Wtime() ;
+    // start_time = MPI_Wtime() ;
 
     MPI_Scatter( BIN1 , chunk_size , MPI_INT , local_bin1 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
     MPI_Scatter( BIN2 , chunk_size , MPI_INT , local_bin2 , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
@@ -151,8 +152,9 @@ int main( int argc , char ** argv ) {
     ///*
     if( my_mpi_rank > 0 ){ 
         MPI_Irecv( & ss_carry_in , 1 , MPI_INT , my_mpi_rank - 1 , 0 , MPI_COMM_WORLD , & irecv_request ) ;
-        //MPI_Status irecv_status ;
-        //MPI_Wait( & irecv_request , & irecv_status ) ;
+        // MPI_Status irecv_status ;
+        // MPI_Wait( & irecv_request , & irecv_status ) ;
+        // printf( "Right after MPI_Irecv, ss_carry_in = %d\n" , ss_carry_in ) ;
     }
 
     CarryLookaheadAdder( local_bin1 , local_bin2 , chunk_size , 
@@ -160,9 +162,9 @@ int main( int argc , char ** argv ) {
 
     MPI_Gather( local_sum , chunk_size , MPI_INT , SUMI , chunk_size , MPI_INT , 0 , MPI_COMM_WORLD ) ;
 
-    finish_time = MPI_Wtime() ;
+    // finish_time = MPI_Wtime() ;
 
-    printf( "Execution time: %lf\n\n" , finish_time - start_time ) ;
+    // printf( "Rank %d, execution time: %lf\n\n" , my_mpi_rank , finish_time - start_time ) ;
    // */
 
     /*=========================================================================
@@ -259,53 +261,32 @@ int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits ,
     int * sspl = ( int * ) malloc( nsupersections * sizeof( int ) ) ;
     int * sscl = ( int * ) malloc( nsupersections * sizeof( int ) ) ;
 
-    int test_rank = 0 ;
     ComputeGiPi( bin1 , bin2 , bits , rank , gi , pi ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Gi\n") ;
-    
 
     ComputeGgjGpj( gi , pi , ngroups , ggj , gpj ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Ggj\n") ;
 
     ComputeSgkSpk( ggj , gpj , nsections , sgk , spk ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Sgk\n") ;
 
     ComputeSsglSspl( sgk , spk , nsupersections , ssgl , sspl ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Ssgl\n") ;
 
     ComputeSscl( ssgl , sspl , nsupersections , mpi_size , rank , request , sscl ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Sscl\n") ;
 
     ComputeSck( sgk , spk , sscl , nsections , sck ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Sck\n") ;
 
     ComputeGcj( ggj , gpj , sck , ngroups , gcj ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Gcj\n") ;
 
     ComputeCi( gi , pi , gcj , bits , ci ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Ci\n") ;
 
     ComputeSumi( bin1 , bin2 , bits , ci , sumi ) ;
     if( barrier == 0 ) MPI_Barrier( MPI_COMM_WORLD ) ;
-    if( rank == test_rank ) 
-        printf( "Sumi\n") ;
-
 
     free( gi ) ;
     free( pi ) ;
@@ -575,8 +556,12 @@ int ComputeSgkSpk( const int * ggj , const int * gpj , const int nsections , int
         */
     }
 
-    // PrintArray( sgk , nsections , "sgk" ) ;
-    // PrintArray( spk , nsections, "spk" ) ;
+    /*
+    if( my_mpi_rank == 1 ) {  
+        PrintArray( sgk , nsections , "sgk" ) ;
+        PrintArray( spk , nsections, "spk" ) ;
+    }
+    */
 
     return EXIT_SUCCESS ;
 }
@@ -625,7 +610,6 @@ int ComputeSsglSspl( const int * sgk , const int * spk , const int nsupersection
 ******************************************************************************/
 int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections , 
                  const int mpi_size , const int rank , MPI_Request * request , int * sscl ){
-    printf( "Rand %d: ss_carry_in = %d\n" , rank , ss_carry_in ) ;
     int l ; 
     MPI_Status irecv_status ;
     MPI_Request isend_request ;
@@ -636,6 +620,7 @@ int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections 
             else {
                 MPI_Wait( request , & irecv_status ) ;
                 sscl[ l ] = ssgl[ l ] || ( sspl[ l ] && ss_carry_in ) ;
+                // printf( "SSCl Rand %d: ss_carry_in = %d\n" , rank , ss_carry_in ) ;
             }
         }
         else 
@@ -649,8 +634,10 @@ int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections 
      * Send the last integer of array sscl to next rank 
      * If mpi_size <= 1, there is no need to send carry_in
      */
-    if( rank <  mpi_size - 1 && mpi_size > 1 )
+    if( rank <  mpi_size - 1 && mpi_size > 1 ) {
+        //printf( "Rank = %d \t mpi_size= %d \t carry_out = %d \n" , rank , mpi_size , *( sscl + nsupersections - 1 ) ) ;
         MPI_Isend( sscl + nsupersections - 1 , 1 , MPI_INT , rank + 1 , 0 , MPI_COMM_WORLD , & isend_request ) ;
+    }
 
     return EXIT_SUCCESS ;
 }
@@ -663,14 +650,40 @@ int ComputeSscl( const int * ssgl , const int * sspl , const int nsupersections 
 int ComputeSck( const int * sgk , const int * spk , const int * sscl , const int nsections , int * sck ) {
     int k ;
     for( k = 0 ; k < nsections ; k++ ) {
-        if( k == 0 ) 
+
+        /*-----------------------------------------
+         * k = 0, first section for each rank
+         *---------------------------------------*/
+        if( k == 0 ) {
             sck[ k ] = sgk[ k ] || ( spk[ k ] && 0 ) ;
+
+            // Rank 0: use zero as initial carry in
+            if( my_mpi_rank == 0 )
+                sck[ k ] = sgk[ k ] || ( spk[ k ] && 0 ) ;
+
+            // Nonzero Rank: use ss_carry_in passed by previous rank
+            else {
+                sck[ k ] = sgk[ k ] || ( spk[ k ] && ss_carry_in ) ;
+                // printf( "Sck Rand %d: ss_carry_in = %d\n" , my_mpi_rank , ss_carry_in ) ;
+            }
+        }
+
+        /*----------------------------------------------------------------
+         * At the boundary of ssc: 
+         *      every BLOCK_SIZE of sections combined into one supersection
+         *----------------------------------------------------------------*/
         else if( k % BLOCK_SIZE == 0 )
             sck[ k ] = sgk[ k ] || ( spk[ k ] && sscl[ k/BLOCK_SIZE - 1 ] ) ;
+
+        /*-------------------------
+         * Other cases 
+         *------------------------*/
         else 
             sck[ k ] = sgk[ k ] || ( spk[ k ] && sck[ k - 1 ] ) ;
     }
-    // PrintArray( sck , nsections , "sck" ) ;
+
+    // if( my_mpi_rank == 1 )
+    //    PrintArray( sck , nsections , "sck" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -682,15 +695,39 @@ int ComputeSck( const int * sgk , const int * spk , const int * sscl , const int
 int ComputeGcj( const int * ggj , const int * gpj , const int * sck , const int ngroups , int * gcj ) {
     int j ;
     for( j = 0 ; j < ngroups ; j++ ) {
-        if( j == 0 ) 
-            gcj[ j ] = ggj[ j ] || ( gpj[ j ] && 0 ) ;
+
+        /*-----------------------------------------
+         * j = 0, first group for each rank
+         *---------------------------------------*/
+        if( j == 0 ) {
+
+            // Rank 0: use zero as initial carry in
+            if( my_mpi_rank == 0 )
+                gcj[ j ] = ggj[ j ] || ( gpj[ j ] && 0 ) ;
+
+            // Nonzero Rank: use ss_carry_in passed by previous rank
+            else {
+                gcj[ j ] = ggj[ j ] || ( gpj[ j ] && ss_carry_in ) ;
+                // printf( "Gcj Rand %d: ss_carry_in = %d\n" , my_mpi_rank , ss_carry_in ) ;
+            }
+        }
+
+        /*----------------------------------------------------------------
+         * At the boundary of section: 
+         *      every BLOCK_SIZE of groups combined into one section 
+         *----------------------------------------------------------------*/
         else if( j % BLOCK_SIZE == 0 ) 
             gcj[ j ] = ggj[ j ] || ( gpj[ j ] && sck[ j/BLOCK_SIZE - 1 ] ) ;
+
+        /*-------------------------
+         * Other groups 
+         *------------------------*/
         else 
             gcj[ j ] = ggj[ j ] || ( gpj[ j ] && gcj[ j - 1 ] ) ;
     }
 
-    //PrintArray( gcj , ngroups , "gcj" ) ;
+    // if( my_mpi_rank == 1 )
+    //    PrintArray( gcj , ngroups , "gcj" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -702,15 +739,39 @@ int ComputeGcj( const int * ggj , const int * gpj , const int * sck , const int 
 int ComputeCi( const int * gi , const int * pi , const int * gcj , const int bits , int * ci ) {
     int i ;
     for( i = 0 ; i < bits ; i++ ) {
-        if( i == 0 ) 
-            ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
+
+        /*------------------------------------------------
+         * k = 0, first individual carry in for each rank
+         *-----------------------------------------------*/
+        if( i == 0 ) {
+            // Rank 0: use zero as initial carry in
+            if( my_mpi_rank == 0 ) {
+                ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
+            }
+
+            // Nonzero Rank: use ss_carry_in passed by previous rank
+            else {
+                ci[ i ] = gi[ i ] || ( pi[ i ] && ss_carry_in ) ;
+                // printf( "Ci Rand %d: ss_carry_in = %d\n" , my_mpi_rank , ss_carry_in ) ;
+            }
+        }
+
+        /*---------------------------------------------------------------------
+         * At the boundary of ssc: 
+         *      every BLOCK_SIZE of individual carry in combined into one group 
+         *---------------------------------------------------------------------*/
         else if( i % BLOCK_SIZE == 0 ) 
             ci[ i ] = gi[ i ] || ( pi[ i ] && gcj[ i/BLOCK_SIZE -1 ] ) ;
+
+        /*-------------------------
+         * Other cases 
+         *------------------------*/
         else 
             ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i - 1 ] ) ;
     }
 
-    // PrintArray( ci , bits , "ci" ) ;
+    // if( my_mpi_rank == 1 )
+    //    PrintArray( ci , bits , "ci" ) ;
 
     return EXIT_SUCCESS ;
 }
@@ -721,7 +782,13 @@ int ComputeCi( const int * gi , const int * pi , const int * gcj , const int bit
 int ComputeSumi( const int * bin1 , const int * bin2 , const int bits , const int * ci , int * sumi ) {
     int i ;
     for( i = 0 ; i < bits ; i++ ){
-        if( i == 0 ) sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ 0 ;
+        if( i == 0 ) { 
+            if( my_mpi_rank == 0 )
+                sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ 0 ;
+            else
+                sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ss_carry_in ;
+        }
+
         else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
     }
 
