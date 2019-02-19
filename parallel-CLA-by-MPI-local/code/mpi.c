@@ -2,7 +2,6 @@
  * C program to parallel the sum of two 1,048,576-bit numbers by uing MPI (message passing interface)
  * Compute speedup of parallel MPI CLA relative to serial MPI CLA 
  * Compute speedup of parallel MPI CLA relative to serial RCA(ripple carry adder)
- * mpirun -np 32 ./a.out input.txt output.txt
  * Jinghua Feng, fengj3@rpi.edu
  */
 
@@ -11,7 +10,9 @@
 #include <string.h>
 #include <mpi.h>
 
+// EXAMPLE DATA STRUCTURE DESIGN AND LAYOUT FOR CLA
 #define MY_INPUT_SIZE 262144
+//#define MY_INPUT_SIZE 400 
 #define BITS MY_INPUT_SIZE * 4
 #define BLOCK_SIZE 32 
 int ss_carry_in = 0 ;
@@ -23,6 +24,7 @@ int WriteOutput( const char * fname , const char * hex_output ) ;
 int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits , const int mpi_size , const int rank , 
                          const int barrier ,  MPI_Request * request , int * sumi ) ;
 
+int RippleCarryAdder( const int * gi , const int * pi , const int bits , int * sumi ) ;
 int ConvertHexToBinary( const char * hex , int * bin ) ;
 int ComputeGiPi( const int * bin1 , const int * bin2 , const int bits , const int rank , int * gi , int * pi ) ;
 int ComputeGgjGpj( const int * gi , const int * pi , const int ngroups , int * ggj , int * gpj ) ;
@@ -46,6 +48,7 @@ int main( int argc , char ** argv ) {
     double start_time , finish_time ;
 
     int my_mpi_size = -1 ;
+    // int my_mpi_rank = -1 ;
 
     // Char array of inputs in hex form
     char * HEX_INPUT_A ;
@@ -157,19 +160,9 @@ int main( int argc , char ** argv ) {
 
     finish_time = MPI_Wtime() ;
 
-    if( my_mpi_rank == 0 ) {
-
+    if( my_mpi_rank == 0 )
         // printf( "Rank %d, execution time: %lf\n\n" , my_mpi_rank , finish_time - start_time ) ;
-        
-        /*
-        if( barrier == 0 )
-           printf( "With MPI_Barrier: \n") ;
-        else
-           printf( "No MPI_Barrier: \n") ;
-         */
-
         printf( "%d\t%lf\n" ,my_mpi_size , finish_time - start_time ) ;
-    }
 
     /*=========================================================================
      * Rank 0: 
@@ -177,6 +170,7 @@ int main( int argc , char ** argv ) {
      *    (2) Write hex SUMI to output file "argv[2]"
      *    (3) Free SUMI and HEX_OUTPUT in rank 0
      *========================================================================*/
+    // /*
     if( 0 == my_mpi_rank ) {
         HEX_OUTPUT = ( char * ) malloc( MY_INPUT_SIZE + 1 ) ;
         // Convert binary sumi to hex form 
@@ -186,12 +180,18 @@ int main( int argc , char ** argv ) {
         free( SUMI ) ;
         free( HEX_OUTPUT ) ;
     }
+    // */
+
+    // Ripper Carry Adder Algorithm * Uncomment below command line if like to check serial result of sumi and addition 
+    // RippleCarryAdder( BIN1 , BIN2 , BITS , SUMI ) ; 
 
     free( local_bin1 ) ;
     free( local_bin2 ) ;
     free( local_sum ) ;
 
+
     MPI_Finalize();
+
     return EXIT_SUCCESS ;
 }
 
@@ -304,6 +304,43 @@ int CarryLookaheadAdder( const int * bin1 , const int * bin2 , const int bits ,
     return EXIT_SUCCESS ;
 }
 
+/*****************************************
+ * Serial ripple alorithm 
+ ****************************************/
+int RippleCarryAdder( const int * bin1 , const int * bin2 , const int bits , int * sumi ) {
+    int i ;
+
+    // Compute gi and pi
+    int * gi = ( int * ) malloc( bits * sizeof( int ) ) ;
+    int * pi = ( int * ) malloc( bits * sizeof( int ) ) ;
+    for( i = 0 ; i < bits ; i++ ) {
+        //printf( "gi[%d] = %d" , i , gi[ i ]) ;
+        gi[ i ] = bin1[ i ] && bin2[ i ] ;
+        pi[ i ] = bin1[ i ] || bin2[ i ] ; 
+    }
+
+    // Get carry-in array ci
+    int * ci = ( int * ) malloc( bits * sizeof( int ) ) ;
+    for( i = 0 ; i < bits ; i++ ) {
+        if( i == 0 ) ci[ i ] = gi[ i ] || ( pi[ i ] && 0 ) ;
+        else ci[ i ] = gi[ i ] || ( pi[ i ] && ci[ i -1 ] ) ;
+    }
+
+    // Compute sumi
+    for( i = 0 ; i < bits ; i++ ) {
+        if( i == 0 ) sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ 0 ;
+        else sumi[ i ] = bin1[ i ] ^ bin2[ i ] ^ ci[ i - 1 ] ;
+    }
+
+    // PrintArray( ci , BITS , "ripple ci" ) ;
+    // PrintArray( sumi , BITS , "ripple sumi" ) ;
+    
+    free( gi ) ;
+    free( pi ) ;
+    free( ci ) ;
+
+    return EXIT_SUCCESS ;
+}
 
 int ConvertHexToBinary( const char * hex , int * bin ) {
     int i ;
@@ -446,7 +483,7 @@ int ComputeGiPi( const int * bin1 , const int * bin2 , const int bits , const in
 }
 
 /************************************************
- 2. Calculate gg_j and gp_j for all BITS/ BLOCK_SIZE groups j 
+ 2. Calculate gg_j and gp_j for all 512 groups j 
 ************************************************/
 int ComputeGgjGpj( const int * gi , const int * pi , const int ngroups , int * ggj , int * gpj ){
     int j , i , ii , jj , tmp ; 
@@ -483,7 +520,7 @@ int ComputeGgjGpj( const int * gi , const int * pi , const int ngroups , int * g
 }
 
 /************************************************
- 3. Calculate sg_k and sp_k for all sections 
+ 3. Calculate sg_k and sp_k for all 64 groups k 
 ************************************************/
 int ComputeSgkSpk( const int * ggj , const int * gpj , const int nsections , int * sgk , int * spk ){
     int k , j , ii , jj , tmp ; 
@@ -527,7 +564,7 @@ int ComputeSgkSpk( const int * ggj , const int * gpj , const int nsections , int
 }
 
 /******************************************************
- 4. Calculate ssg_l and ssp_l for all super sections j 
+ 4. Calculate ssg_l and ssp_l for all BLOCK_SIZE super sections j 
 ******************************************************/
 int ComputeSsglSspl( const int * sgk , const int * spk , const int nsupersections , int * ssgl , int * sspl ){
     int l , k , ii , jj , tmp ;
@@ -615,6 +652,7 @@ int ComputeSck( const int * sgk , const int * spk , const int * sscl , const int
          * k = 0, first section for each rank
          *---------------------------------------*/
         if( k == 0 ) {
+            sck[ k ] = sgk[ k ] || ( spk[ k ] && 0 ) ;
 
             // Rank 0: use zero as initial carry in
             if( my_mpi_rank == 0 )
