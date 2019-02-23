@@ -1,5 +1,0 @@
-ssh PCP8fngj@lp03.ccni.rpi.edu
-or 
-ssh PCP8fngj@lp02.ccni.rpi.edu
-
-ssh amos
