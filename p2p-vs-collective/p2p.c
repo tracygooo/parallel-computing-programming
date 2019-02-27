@@ -11,9 +11,17 @@
 #include <mpi.h>
 
 // #define BGQ 1 // when running BG/Q, comment out when running on mastiff
+
 #ifdef BGQ
 #include<hwi/include/bqc/A2_inlines.h>
+unsigned long long start_cycles = 0;
+unsigned long long end_cycles = 0;
+double processor_frequency = 1600000000.0;
+
 #else
+double start_cycles = 0;
+double end_cycles = 0;
+double processor_frequency = 1.0;
 #define GetTimeBase MPI_Wtime
 #endif
 
@@ -23,10 +31,6 @@ int MY_MPI_RANK = -1 ;
 int MY_MPI_SIZE = -1 ;
 
 double time_in_secs = 0;
-// double processor_frequency = 1600000000.0;
-double processor_frequency = 1.0;
-unsigned long long start_cycles = 0;
-unsigned long long end_cycles = 0;
 
 unsigned long long CollectiveReduce( unsigned long long chunk_size ) ;
 int PointToPointReduce( const unsigned long long chunk_size , unsigned long long * final_sum ) ;
@@ -46,8 +50,10 @@ int main( int argc , char ** argv ) {
     time_in_secs = ((double)(end_cycles - start_cycles)) / processor_frequency;
     if( MY_MPI_RANK == 0 ){
         printf( "collect_final_sum: %llu \n" , collect_final_sum ) ;
-        printf( "start_cycles: %llu \n" , start_cycles ) ;
-        printf( "end_cycles: %llu \n" , end_cycles ) ;
+        //printf( "start_cycles: %llu \n" , start_cycles ) ;
+        printf( "start_cycles: %f \n" , start_cycles ) ;
+        //printf( "end_cycles: %llu \n" , end_cycles ) ;
+        printf( "end_cycles: %f \n" , end_cycles ) ;
         printf( "time_in_secs: %f \n\n\n" , time_in_secs ) ;
     }
 
@@ -57,8 +63,10 @@ int main( int argc , char ** argv ) {
     time_in_secs = ((double)(end_cycles - start_cycles)) / processor_frequency;
     if( MY_MPI_RANK == 0 ) {
         printf( "P2P_final_sum: %llu \n" , P2P_final_sum ) ;
-        printf( "start_cycles: %llu \n" , start_cycles ) ;
-        printf( "end_cycles: %llu \n" , end_cycles ) ;
+        //printf( "start_cycles: %llu \n" , start_cycles ) ;
+        printf( "start_cycles: %f \n" , start_cycles ) ;
+        //printf( "end_cycles: %llu \n" , end_cycles ) ;
+        printf( "end_cycles: %f \n" , end_cycles ) ;
         printf( "time_in_secs: %f \n" , time_in_secs ) ;
     }
 
