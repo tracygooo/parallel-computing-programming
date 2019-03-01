@@ -22,28 +22,30 @@ __status__ = "Dev"
 
 def PlotFunt( x , y , method , ylb ) :
     if method is 0 :
-        plt.plot( x , y ,  '--r' , label = r'with MPI\_reduce()', marker = 'o', \
+        plt.plot( x , y ,  '--r' , label = r'MPI\_reduce()', marker = 'o', \
                   ms = 8 , mfc = 'none' , mec = 'r' , mew = 2 )
     else :
-        plt.plot( x , y ,  '-b' , label = r'without MPI\_P2P\_reduce()', marker = '^', \
+        plt.plot( x , y ,  '-b' , label = r'MPI\_P2P\_reduce()', marker = '^', \
                   ms = 8 , mfc = 'none' , mec = 'b' , mew = 2 )
+    plt.yscale( 'log' )
     plt.xlabel( 'Rank' )
     plt.ylabel( ylb )
     plt.legend()
 
 data = np.loadtxt( "./output.txt" )
 
-#----------------------Execution vs rank------------------------
+
+# --------------------- MPI_reduce----------------------------------------
 plt.figure( 0 )
-
-# MPI_reduce
 PlotFunt( data[ 0:, 0 ] , data[ 0:, 1 ] , 0 ,  "Execution/s" )
-
-# MPI_P2P_reduce
-PlotFunt( data[ 0:, 0 ] , data[ 0:, 2 ] , 1 ,  "Execution/s" )
-
-#plt.title( "Execution time at different ranks" )
 plt.tight_layout()
-plt.savefig( "exe_vs_rank.png" , bbox_inches = "tight" , format = 'png' )
+#plt.title( "Execution time at different ranks" )
+plt.savefig( "collective.png" , bbox_inches = "tight" , format = 'png' )
+
+# --------------------- MPI_P2P_reduce----------------------------------------
+plt.figure(  )
+PlotFunt( data[ 0:, 0 ] , data[ 0:, 2 ] , 1 ,  "Execution/s" )
+plt.tight_layout()
+plt.savefig( "p2p.png" , bbox_inches = "tight" , format = 'png' )
 
 plt.show()
