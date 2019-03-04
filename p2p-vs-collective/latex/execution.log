@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2019.1.7)  28 FEB 2019 20:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2019.1.7)  3 MAR 2019 17:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -471,6 +471,13 @@ Package: enumitem 2011/09/28 v3.5.2 Customized lists
 \enit@inbox=\box28
 \enitdp@description=\count103
 )
+(/usr/share/texlive/texmf-dist/tex/latex/natbib/natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip49
+\bibsep=\skip50
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count104
+)
 (/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2010/09/12 v5.6 Page Geometry
 
@@ -485,9 +492,9 @@ Package ifvtex Info: VTeX not detected.
 (/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
-\Gm@cnth=\count104
-\Gm@cntv=\count105
-\c@Gm@tempcnt=\count106
+\Gm@cnth=\count105
+\Gm@cntv=\count106
+\c@Gm@tempcnt=\count107
 \Gm@bindingoffset=\dimen124
 \Gm@wd@mp=\dimen125
 \Gm@odd@mp=\dimen126
@@ -500,7 +507,7 @@ Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
 (/usr/share/texlive/texmf-dist/tex/latex/floatrow/floatrow.sty
 Package: floatrow 2008/08/02 v0.3b floatrow: float package extension
-\c@float@type=\count107
+\c@float@type=\count108
 \float@exts=\toks25
 \float@box=\box29
 \@floatcapt=\box30
@@ -512,57 +519,57 @@ Package floatrow Info: Modified rotfloat package code loaded on input line 473.
 \FB@wd=\dimen132
 \FBo@wd=\dimen133
 \FBc@wd=\dimen134
-\FBo@ht=\skip49
-\FBc@ht=\skip50
-\FBf@ht=\skip51
-\FBo@max=\skip52
-\FBc@max=\skip53
-\FBf@max=\skip54
-\c@FBl@b=\count108
-\floatbox@depth=\count109
-\c@FRobj=\count110
-\c@FRsobj=\count111
-\Xhsize=\skip55
-\sXhsize=\skip56
-\Zhsize=\skip57
-\sZhsize=\skip58
+\FBo@ht=\skip51
+\FBc@ht=\skip52
+\FBf@ht=\skip53
+\FBo@max=\skip54
+\FBc@max=\skip55
+\FBf@max=\skip56
+\c@FBl@b=\count109
+\floatbox@depth=\count110
+\c@FRobj=\count111
+\c@FRsobj=\count112
+\Xhsize=\skip57
+\sXhsize=\skip58
+\Zhsize=\skip59
+\sZhsize=\skip60
 \flrow@rowbox=\box31
 \FR@Zunitlength=\dimen135
-\c@FBcnt=\count112
-\FPOScnt=\count113
-\LTleft=\skip59
-\LTright=\skip60
+\c@FBcnt=\count113
+\FPOScnt=\count114
 \LTleft=\skip61
 \LTright=\skip62
+\LTleft=\skip63
+\LTright=\skip64
 \flrow@types=\toks27
 )
 (./execution.aux)
 \openout1 = `execution.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
  (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count114
+\scratchcounter=\count115
 \scratchdimen=\dimen136
 \scratchbox=\box32
-\nofMPsegments=\count115
-\nofMParguments=\count116
+\nofMPsegments=\count116
+\nofMParguments=\count117
 \everyMPshowfont=\toks28
-\MPscratchCnt=\count117
+\MPscratchCnt=\count118
 \MPscratchDim=\dimen137
-\MPnumerator=\count118
-\makeMPintoPDFobject=\count119
+\MPnumerator=\count119
+\makeMPintoPDFobject=\count120
 \everyMPtoPDFconversion=\toks29
 ) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
@@ -656,12 +663,12 @@ File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
 Package color Info: Driver file: pdftex.def on input line 143.
 )
-LaTeX Font Info:    Try loading font information for U+msa on input line 19.
+LaTeX Font Info:    Try loading font information for U+msa on input line 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 19.
+LaTeX Font Info:    Try loading font information for U+msb on input line 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -672,35 +679,41 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 File: ../output/collective.png Graphic file (type png)
 
 <use ../output/collective.png>
-Package pdftex.def Info: ../output/collective.png used on input line 72.
+Package pdftex.def Info: ../output/collective.png used on input line 74.
 (pdftex.def)             Requested size: 216.80946pt x 158.9936pt.
 
 <../output/p2p.png, id=14, 433.62pt x 317.988pt>
 File: ../output/p2p.png Graphic file (type png)
  <use ../output/p2p.png>
-Package pdftex.def Info: ../output/p2p.png used on input line 93.
+Package pdftex.def Info: ../output/p2p.png used on input line 95.
 (pdftex.def)             Requested size: 216.80946pt x 158.9936pt.
 
-[2 <../output/collective.png>] [3 <../output/p2p.png>] (./execution.aux) ) 
+[2 <../output/collective.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 102--134
+
+ []
+
+[3 <../output/p2p.png>] [4] (./execution.aux) ) 
 Here is how much of TeX's memory you used:
- 5167 strings out of 494953
- 74394 string characters out of 6180978
- 144806 words of memory out of 5000000
- 8372 multiletter control sequences out of 15000+600000
- 11056 words of font info for 44 fonts, out of 8000000 for 9000
+ 5502 strings out of 494953
+ 78372 string characters out of 6180978
+ 150608 words of memory out of 5000000
+ 8702 multiletter control sequences out of 15000+600000
+ 11364 words of font info for 45 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 42i,9n,41p,407b,373s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr
-/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmtt10.pfb>
-Output written on execution.pdf (3 pages, 112540 bytes).
+ 42i,9n,41p,819b,374s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on execution.pdf (4 pages, 135216 bytes).
 PDF statistics:
- 43 PDF objects out of 1000 (max. 8388607)
- 27 compressed objects within 1 object stream
+ 54 PDF objects out of 1000 (max. 8388607)
+ 35 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  11 words of extra memory for PDF output out of 10000 (max. 10000000)
 

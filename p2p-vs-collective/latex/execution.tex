@@ -6,6 +6,8 @@
 \usepackage{subcaption}
 \usepackage{enumitem}
 
+\usepackage[super,square]{natbib} 
+
 \usepackage[margin=1in]{geometry}
 \usepackage{floatrow}
 \floatsetup[table]{capposition=top}
@@ -60,7 +62,7 @@ The execution versus number of ranks based on collective approach is shown in Ta
 		\hline
 		Rank & 64 & 128 & 256 & 512 & 1024 & 2048 & 4096 & 8912\\
 		\hline
-		Execution & 0.743647 & 0.372150 & 0.188339 & 0.094208 & 0.047130 & 0.023601 & 0.011818 & 0.005934 \\
+		Execution/s & 0.743647 & 0.372150 & 0.188339 & 0.094208 & 0.047130 & 0.023601 & 0.011818 & 0.005934 \\
 		\hline
 	\end{tabular}
 \caption{ Execution time of collective method at differnet MPI ranks}
@@ -74,7 +76,7 @@ The execution versus number of ranks based on collective approach is shown in Ta
 \end{figure}
 
 
-\section{Point2Point- execution at different ranks}
+\section{Point2Point - execution at different ranks}
 The execution versus number of ranks based on point2point approach is shown in Figure 2 below, which has almost the same trend with collective method.
 
 \begin{table}[!htb]\centering
@@ -82,10 +84,10 @@ The execution versus number of ranks based on point2point approach is shown in F
 		\hline
 		Rank & 64 & 128 & 256 & 512 & 1024 & 2048 & 4096 & 8912\\
 		\hline
-		Execution & 0.743647 & 0.372150 & 0.188339 & 0.094208 & 0.047130 & 0.023601 & 0.011818 & 0.005934 \\
+		Execution/s & 0.744446 & 0.405087 & 0.211960 & 0.099459 & 0.051483 & 0.024759 & 0.012387 & 0.005763 \\
 		\hline
 	\end{tabular}
-	\caption{ Execution time of collective method at differnet MPI ranks}
+	\caption{ Execution time of P2P method at differnet MPI ranks}
 \end{table}
 
 \begin{figure}[!htb]
@@ -95,6 +97,44 @@ The execution versus number of ranks based on point2point approach is shown in F
 \end{figure}
 
 
-\section{Compare two methods}
+\newpage
+\section{Compare collective and P2P}
+By comparing above Table 1 and 2, we can easily find, for most ranks, P2P manually developed is slightly slower than collective communication MPI\_reduce embedded in MPI. Based on the explanation in Pacheco's textbook\cite{Pacheco}, collective  MPI\_reduce applies similar "binary tree structure" with Point2Point implementation in our assignment. Thus both methods has the property that sum operation is done concurrently by different processes, improving the operation efficiency a lot. The same scheme applied by these two implementations leads to their close executions. However, as the developer of MPI implementation knows better about the hardware and system software, it is not surprised that MPI\_reduce deals with implementation details better, and thus performs better.\\\\
+Another observation is collective approach has lower variance of execution time. For instance, by repeating the case of 16 nodes (1024 ranks) 10 times, we obtain the execution results as below Table 3 shows. It indicates that Point2Point method has relatively higher variance. Thus collective MPI\_reduce is a more stable approach, which may also benefit from the better optimization of embedded MPI routines.
+\begin{table}[!htb]\centering
+	\begin{tabular}{|c|c|c|}
+		\hline
+		& Collective & Point2Point \\
+		\hline
+		 1 & 0.009262  &  0.009630\\
+		 \hline
+		 2 & 0.009253  &  0.009633\\
+		 \hline
+		 3 & 0.009257  &  0.009639\\
+		 \hline
+		 4 & 0.009262  &  0.009638\\
+		 \hline
+		 5 & 0.009261  &  0.009634\\
+		 \hline
+		 6 & 0.009261  &  0.009629\\
+		 \hline
+		 7 & 0.009254  &  0.009635\\
+		 \hline
+		 8 & 0.009262  &  0.009639\\
+		 \hline
+		 9 & 0.009260  &  0.009635\\
+		 \hline
+		 10 & 0.009258  &  0.009634\\
+		\hline
+		Variance & \textbf{1.020e-11}  &  \textbf{1.064e-11}\\
+		\hline
+	\end{tabular}
+	\caption{ Execution time of P2P method at differnet MPI ranks}
+\end{table}
 
+\newpage
+\begin{thebibliography}{}
+	\bibitem{Pacheco}
+	Pacheco, Peter. An introduction to parallel programming. Elsevier, 2011, pp. 102-106.
+\end{thebibliography}
 \end{document}

@@ -37,14 +37,14 @@ data = np.loadtxt( "./output.txt" )
 
 # --------------------- MPI_reduce----------------------------------------
 plt.figure( 0 )
-PlotFunt( data[ 0:, 0 ] , data[ 0:, 1 ] , 0 ,  "Execution/s" )
+PlotFunt( data[ 0:, 0 ] , data[ 0:, 1 ] , 0 ,  "log(Execution)/s" )
 plt.tight_layout()
 #plt.title( "Execution time at different ranks" )
 plt.savefig( "collective.png" , bbox_inches = "tight" , format = 'png' )
 
 # --------------------- MPI_P2P_reduce----------------------------------------
 plt.figure(  )
-PlotFunt( data[ 0:, 0 ] , data[ 0:, 2 ] , 1 ,  "Execution/s" )
+PlotFunt( data[ 0:, 0 ] , data[ 0:, 2 ] , 1 ,  "log(Execution)/s" )
 plt.tight_layout()
 plt.savefig( "p2p.png" , bbox_inches = "tight" , format = 'png' )
 
