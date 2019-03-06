@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+//#include <math.h>
 #include <mpi.h>
 
 //#define BGQ 1 // when running BG/Q, comment out when running on mastiff
@@ -35,6 +35,8 @@ double time_in_secs = 0;
 
 unsigned long long CollectiveReduce( unsigned long long chunk_size ) ;
 int PointToPointReduce( const unsigned long long chunk_size , unsigned long long * final_sum ) ;
+int ComputePower( const int base , const int exponent ) ;
+int ComputeLog2( const int power ) ;
 
 int main( int argc , char ** argv ) {
 
@@ -53,7 +55,8 @@ int main( int argc , char ** argv ) {
     time_in_secs = ((double)(end_cycles - start_cycles)) / processor_frequency;
     if( MY_MPI_RANK == 0 ){
         // print for submitty
-        printf( "%llu %f\n" , collect_final_sum , time_in_secs ) ;
+        // printf( "%llu %f\n" , collect_final_sum , time_in_secs ) ;
+        printf( "%llu\n" , collect_final_sum ) ;
 
         // uncomment "/* */" if printing detailed execution
         /*
@@ -76,7 +79,8 @@ int main( int argc , char ** argv ) {
     if( MY_MPI_RANK == 0 ) { 
 
         // print for submitty
-        printf( "%llu %f\n" , P2P_final_sum , time_in_secs ) ;
+        // printf( "%llu %f\n" , P2P_final_sum , time_in_secs ) ;
+        printf( "%llu\n" , P2P_final_sum ) ;
 
         // uncomment "/* */" if printing detailed execution
         /*
@@ -121,7 +125,8 @@ int PointToPointReduce( const unsigned long long chunk_size , unsigned long long
         local_sum += i ;
 
     // # of layers to obtain final sum 
-    int max_layer = ( int ) ( log10( ( double ) MY_MPI_SIZE ) / log10( 2.0 ) ) ;
+    // int max_layer = ( int ) ( log10( ( double ) MY_MPI_SIZE ) / log10( 2.0 ) ) ;
+    int max_layer =  ComputeLog2( MY_MPI_SIZE ) ;
 
     MPI_Request isend_request , irecv_request ;
     MPI_Status irecv_status ;
@@ -131,7 +136,8 @@ int PointToPointReduce( const unsigned long long chunk_size , unsigned long long
     int l , j , tmp ;
     for( l = 0 ; l < max_layer ; l++ ) {
         // j_ini = 2^l , j_fin = MY_MPI_SIZE - 2^l , j_del = 2^(l+1)
-        tmp = ( int ) pow( 2.0 , ( double ) l ) ;
+        // tmp = ( int ) pow( 2.0 , ( double ) l ) ;
+        tmp = ComputePower( 2 , l ) ; 
         for( j = tmp ; j <= MY_MPI_SIZE - tmp ; j += 2*tmp ) {
 
             if( MY_MPI_RANK == j ) {
@@ -152,4 +158,24 @@ int PointToPointReduce( const unsigned long long chunk_size , unsigned long long
         * final_sum = local_sum ;
 
     return EXIT_SUCCESS ;
+}
+
+int ComputePower( const int base , const int exponent ) {
+    int i ;
+    int power = 1 ; 
+    for( i = 0 ; i < exponent ; i ++ ) {
+        power *= base ;
+    }
+    return power ;
+}
+
+int ComputeLog2( const int power ) {
+    int exponent = 0 ;
+    int tmp = 1 ;
+    while( tmp < power ){
+        tmp *= 2 ;
+        exponent += 1 ;
+    }
+    return exponent ;
+
 }
