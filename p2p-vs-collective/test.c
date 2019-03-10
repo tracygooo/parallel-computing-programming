@@ -29,7 +29,7 @@ int main( int argc , char ** argv ) {
     printf( "%d^%d = %d\n" , base , exponent , ComputePower( base , exponent ) ) ;
 
     // Test function ComputeLog2() 
-    int power = 1024 * 1024 * 1024 ;
+    int power = 1025 ;
     printf( "log2(%d) = %d\n" , power , ComputeLog2( power ) ) ;
 
     return EXIT_SUCCESS ;

@@ -8,17 +8,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <math.h>
 #include <mpi.h>
 
-//#define BGQ 1 // when running BG/Q, comment out when running on mastiff
+// For running BG/Q, comment out when running on mastiff
+// #define BGQ 1 
 
+// Use GetTimeBase() to compute running time on BG/Q
 #ifdef BGQ
 #include<hwi/include/bqc/A2_inlines.h>
 unsigned long long start_cycles = 0;
 unsigned long long end_cycles = 0;
 double processor_frequency = 1600000000.0;
 
+// Use MPI_Wtime() to compute running time on Mastiff 
 #else
 double start_cycles = 0;
 double end_cycles = 0;
@@ -26,13 +28,17 @@ double processor_frequency = 1.0;
 #define GetTimeBase MPI_Wtime
 #endif
 
-// #define INPUT_SIZE 1073741824
+// Global variable for size of the single long array 
 #define MY_INPUT_SIZE 1024 * 1024 *1024
+
+// Global variables for MPI rank and size
 int MY_MPI_RANK = -1 ;
 int MY_MPI_SIZE = -1 ;
 
+// Global variable for running time 
 double time_in_secs = 0;
 
+// Declaration of functions 
 unsigned long long CollectiveReduce( unsigned long long chunk_size ) ;
 int PointToPointReduce( const unsigned long long chunk_size , unsigned long long * final_sum ) ;
 int ComputePower( const int base , const int exponent ) ;
@@ -54,51 +60,17 @@ int main( int argc , char ** argv ) {
     collect_final_sum = CollectiveReduce( chunk_size ) ;
     end_cycles= GetTimeBase();
     time_in_secs = ((double)(end_cycles - start_cycles)) / processor_frequency;
-    if( MY_MPI_RANK == 0 ){
-        // print for submitty
-        // printf( "%llu %f\n" , collect_final_sum , time_in_secs ) ;
-        //printf( "%llu\n" , collect_final_sum ) ;
-
-        // uncomment "/* */" if printing detailed execution
-        /*
-        printf( "collect_final_sum: %llu \n" , collect_final_sum ) ;
-        change "%llu" to "%f" if defined as double
-        printf( "start_cycles: %llu \n" , start_cycles ) ;
-        printf( "end_cycles: %llu \n" , end_cycles ) ;
-        printf( "time_in_secs: %f \n\n" , time_in_secs ) ;
-	    */
-        
-        // uncomment "//" if only execution needed
-        // printf( "%f\t" , time_in_secs ) ;
-    }
-    //printf( "Rank %d: %llu\n" , MY_MPI_RANK , collect_final_sum ) ;
 
     /******************** Point2Point ***********************/
     start_cycles= GetTimeBase();
     PointToPointReduce( chunk_size , & P2P_final_sum ) ;
     end_cycles= GetTimeBase();
     time_in_secs = ((double)(end_cycles - start_cycles)) / processor_frequency;
+
+    /******************** Output results ************************/
     if( MY_MPI_RANK == 0 ) { 
-
-        // print for submitty
-        // printf( "%llu %f\n" , P2P_final_sum , time_in_secs ) ;
-        // printf( "%llu\n" , P2P_final_sum ) ;
-
-        // uncomment "/* */" if printing detailed execution
-        /*
-        printf( "P2P_final_sum: %llu \n" , P2P_final_sum ) ;
-        // change "%llu" to "%f" if defined as double
-        printf( "start_cycles: %llu \n" , start_cycles ) ;
-        printf( "end_cycles: %llu \n" , end_cycles ) ;
-        printf( "time_in_secs: %f \n" , time_in_secs ) ;
-        */
-
-        // uncomment "//" if only execution needed
-        // printf( "%f\n" , time_in_secs ) ;
-    }
-
-    if( MY_MPI_RANK == 0 ) { 
-        WriteOutput( "STDOUT_1.txt" , collect_final_sum , P2P_final_sum ) ;
+        //WriteOutput( "STDOUT_1.txt" , collect_final_sum , P2P_final_sum ) ;
+        printf( "%llu\n%llu\n" , collect_final_sum , P2P_final_sum ) ;
     }
 
     MPI_Finalize() ;
@@ -139,12 +111,14 @@ int PointToPointReduce( const unsigned long long chunk_size , unsigned long long
     MPI_Request isend_request , irecv_request ;
     MPI_Status irecv_status ;
 
-    // l: layer iter 
-    // j, j-tmp: pairwise ranks at each layer to execute MPI_Isend and MPI_Irecv respectively
+    /* 
+     * l: layer iter 
+     * j, j-tmp: pairwise ranks at each layer to execute MPI_Isend and MPI_Irecv respectively
+     *
+     */
     int l , j , tmp ;
     for( l = 0 ; l < max_layer ; l++ ) {
         // j_ini = 2^l , j_fin = MY_MPI_SIZE - 2^l , j_del = 2^(l+1)
-        // tmp = ( int ) pow( 2.0 , ( double ) l ) ;
         tmp = ComputePower( 2 , l ) ; 
         for( j = tmp ; j <= MY_MPI_SIZE - tmp ; j += 2*tmp ) {
 
@@ -177,6 +151,7 @@ int ComputePower( const int base , const int exponent ) {
     return power ;
 }
 
+// Compute logrithm with base 2
 int ComputeLog2( const int power ) {
     int exponent = 0 ;
     int tmp = 1 ;
@@ -187,6 +162,7 @@ int ComputeLog2( const int power ) {
     return exponent ;
 }
 
+// Write sums to file
 int WriteOutput( const char * fname , const unsigned long long collect_sum , const unsigned long long p2p_sum ) { 
 
     FILE * file ;
