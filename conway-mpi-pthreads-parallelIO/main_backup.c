@@ -45,9 +45,11 @@ double g_time_in_secs = 0;
 double g_processor_frequency = 1600000000.0; // processing speed for BG/Q
 unsigned long long g_start_cycles=0;
 unsigned long long g_end_cycles=0; // You define these 
+
 /***************************************************************************/
 /* Function Decs ***********************************************************/
 /***************************************************************************/
+int WriteUniverse( const int mpi_myrank , const int chunk_int_num , const int * chunk_universe , const char * filename , MPI_File fh ) ;
 
 // You define these
 
@@ -64,9 +66,8 @@ int main(int argc, char *argv[])
     int * buff2 ;
 
     MPI_File fh;
-    MPI_Offset offset ;
-    MPI_Offset file_size ;
-    MPI_Status status;
+    //MPI_Offset offset ;
+    //MPI_Status status;
     int chunk_int_num ;
 
 
@@ -82,8 +83,9 @@ int main(int argc, char *argv[])
 // You must replace mpi_myrank with the right row being used.
 // This just show you how to call the RNG.    
     printf("Rank %d of %d has been started and a first Random Value of %lf\n", 
-       mpi_myrank, mpi_commsize, GenVal(mpi_myrank));
+	   mpi_myrank, mpi_commsize, GenVal(mpi_myrank));
 
+    /*
     chunk_int_num = ROWS * ROWS / mpi_commsize ;
     buff = ( int * ) malloc( chunk_int_num * sizeof( int ) ) ;
     int i ;
@@ -99,11 +101,28 @@ int main(int argc, char *argv[])
     MPI_File_open( MPI_COMM_WORLD, "universe.txt", MPI_MODE_RDWR | MPI_MODE_CREATE , MPI_INFO_NULL, &fh ) ;
     // MPI_File_write_at( fh , offset , buff , chunk_int_num * sizeof( int ) , MPI_INT, &status );
     MPI_File_write_at( fh , offset , buff , chunk_int_num , MPI_INT, &status );
+    */
+
+    chunk_int_num = ROWS * ROWS / mpi_commsize ;
+    buff = ( int * ) malloc( chunk_int_num * sizeof( int ) ) ;
+    int i ;
+    for( i = 0 ; i < chunk_int_num ; i++ ) {
+        buff[ i ] = mpi_myrank * chunk_int_num + i ;
+        //printf( "%d " , buff[ i ] ) ;
+    }
+
+    WriteUniverse( mpi_myrank , chunk_int_num , buff , "universe.txt" , fh ) ;
     MPI_Barrier( MPI_COMM_WORLD );
 
+    //MPI_File fh;
+    MPI_Offset offset ;
+    MPI_Status status;
+
+    offset = mpi_myrank * chunk_int_num ;
+    printf( "offset: %d\n" , offset ) ;
     buff2 = ( int * ) malloc( chunk_int_num * sizeof( int ) ) ;
-    
     MPI_Barrier( MPI_COMM_WORLD );
+    MPI_File_open( MPI_COMM_WORLD, "universe.txt", MPI_MODE_RDWR | MPI_MODE_CREATE , MPI_INFO_NULL, &fh ) ;
     MPI_File_read_at(fh, offset, buff2, chunk_int_num , MPI_INT , &status) ;
     MPI_Barrier( MPI_COMM_WORLD );
 
@@ -139,3 +158,30 @@ int main(int argc, char *argv[])
 /***************************************************************************/
 /* Other Functions - You write as part of the assignment********************/
 /***************************************************************************/
+int WriteUniverse( const int mpi_myrank , const int chunk_int_num , const int * chunk_universe , const char * filename , MPI_File fh )
+{
+
+    MPI_Offset offset = mpi_myrank * chunk_int_num * sizeof( int ) ;
+    /*
+    int i ;
+    for( i = 0 ; i < chunk_int_num ; i++ ) {
+        if( mpi_myrank == 1 ) {
+            printf( "buff[%d] = %d\n" , i , chunk_universe[ i ] ) ;
+        }
+    }
+    */
+
+    //MPI_File fh ;
+    MPI_File_open( MPI_COMM_WORLD , filename , MPI_MODE_RDWR | MPI_MODE_CREATE , MPI_INFO_NULL, &fh ) ;
+
+    MPI_Status status ;
+    MPI_File_write_at( fh , offset , chunk_universe , chunk_int_num , MPI_INT, & status ) ;
+
+    MPI_File_close( &fh ) ; 
+    return EXIT_SUCCESS ;
+}
+
+
+
+
+
