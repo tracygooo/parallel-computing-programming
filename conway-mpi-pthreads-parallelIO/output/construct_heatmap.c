@@ -3,6 +3,7 @@
  * Set mpi_commsize = GRID_SIZE / HEAT_MAP_SIZE
  * Set mpi_commsize = 1024 ( 16 nodes with 64 ranks in each node ), then each rank deals with 32 rows
  * Construct 1K X 1K heatmap with each element accumulating 32*32 grid of live/dead states 
+ * Output obtained grid to "heatmap.bin" 
  *
  */
 #include<stdio.h>
@@ -42,17 +43,10 @@ double g_time_in_secs = 0;
 double g_processor_frequency = 1600000000.0; // processing speed for BG/Q
 unsigned long long g_start_cycles=0;
 unsigned long long g_end_cycles=0; // You define these 
+
 /***************************************************************************/
 /* Function Decs ***********************************************************/
 /***************************************************************************/
-/*
-int** Allocation(int input_rows, int input_cols) ;
-void Initialization(int **input_grid_chunk, int input_rows, int input_cols) ;
-void PrintGrid(int **input_grid_chunk, int start_row, int end_row) ;
-void PrintHeatmap( int ** heatmap , const int hm_size ) ;
-void FreeGrid(int **input_grid_chunk, int input_rows) ;
-*/
-
 
 // You define these
 
@@ -65,6 +59,8 @@ int main(int argc, char *argv[])
 {
     int mpi_myrank;
     int mpi_commsize;
+    int row_per_rank ;
+    int chunk_int_num ;
 
     // -------------------------------------------------------------------
     // Parameters for MPI I/O
@@ -83,7 +79,6 @@ int main(int argc, char *argv[])
     MPI_Comm_rank( MPI_COMM_WORLD, &mpi_myrank ) ;
 
     // Number of chunk array in each MPI rank
-    int chunk_int_num ;
     chunk_int_num = GRID_SIZE * GRID_SIZE / mpi_commsize ;
 
 
@@ -108,7 +103,6 @@ int main(int argc, char *argv[])
     MPI_File_close( &fh ); 
 
     // Number of rows in each MPI rank 
-    int row_per_rank ;
     row_per_rank = GRID_SIZE / mpi_commsize ;
 
     if( row_per_rank != HEATMAP_CHUNK_SIZE ){
@@ -162,25 +156,6 @@ int main(int argc, char *argv[])
 
     MPI_Finalize();
     return 0;
-    //--------------------------------------------------------------------
-    // Read data from binary file "heatmap.bin"
-    // Output "heatmap.txt" with matrix form 
-    //--------------------------------------------------------------------
-    /*
-    if( mpi_myrank == 0 )
-    {
-        int ** heatmap = Allocation( HEATMAP_SIZE , HEATMAP_SIZE ) ;
-        FILE * f ; 
-        f = fopen( "heatmap.bin" , "rb" ) ;
-        for( i = 0 ; i < HEATMAP_SIZE ; i++ ) {
-            fread( heatmap[ i ] , sizeof(int) , HEATMAP_SIZE , f ) ;
-        }
-
-        PrintHeatmap( heatmap , HEATMAP_SIZE ) ;
-        FreeGrid( heatmap , HEATMAP_SIZE ) ;
-    }
-    */
-
 
 }
 
