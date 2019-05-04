@@ -1,0 +1,8 @@
+Initial Conditions:
+	NUM_NODES = 16
+	MY_MPI_SIZE = 256
+	THRD_PER_RANK = 4
+Overhead time =  2.830000 
+Total execution time =  35.787762 
+Real Compute execution time =  32.957763 
+C[0] = 8192

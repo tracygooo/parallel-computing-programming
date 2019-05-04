@@ -1,0 +1,18 @@
+#Initial Conditions:
+#	DATATYPE_SIZE = 4
+#	NUM_NODES = 64
+#	NUM_RNAKS = 4096
+#	MAT_ROWS = 1024
+
+# SetupCartTopology() takes time:
+	0.123503
+# InitializeAlignment() takes time:
+	0.000140
+# Real matmul time:
+	0.005484
+# Isend and Irecv time:
+	0.004793
+# Cannon total execution time:
+	0.137714
+#Parallel I/O time:
+	2.959603
