@@ -1,33 +1,34 @@
-Project: Parallel Matrix Multiplication Algorithms
+# Project: Parallel Matrix Multiplication Algorithms
 
 We implement two parallel matrix multiplication algorithms -- the Cannon's algorithm and the strip algorithm -- using MPI, Pthreads, and MPI I/O and conduct a performance study on the IBM Blue Gene/Q
 
 Team Members: Miao Qi & Jinghua Feng
 
 
-Member Contribution:
-Miao Qi: 
-    1. Code implementation for the strip parallel algorithm
-    2. Report: 
-       (1) Abstract/Introduction/Related Work/Future Work
-       (2) Implementation of Parallel Algorithms: contents related to the strip parallel algorithm
-       (3) Experimental Results and Discussion: contents related to the strip parallel algorithm
+## Member Contribution
+### Jinghua Feng
+1. Code implementation for Cannon's algorithm
+2. Report: 
+    - Implementation of Parallel Algorithms: contents related to Cannon's algorithm
+    - Experimental Results and Discussion: contents related to Cannon's algorithm 
+    - Comparision of two algorithms/Conclusion
+### Miao Qi
+1. Code implementation for the strip parallel algorithm
+2. Report: 
+    - Abstract/Introduction/Related Work/Future Work
+    - Implementation of Parallel Algorithms: contents related to the strip parallel algorithm
+    - Experimental Results and Discussion: contents related to the strip parallel algorithm
 
-Jinghua Feng: 
-    1. Code implementation for Cannon's algorithm
-    2. Report: 
-      (1) Implementation of Parallel Algorithms: contents related to Cannon's algorithm
-      (2) Experimental Results and Discussion: contents related to Cannon's algorithm 
-      (3) Comparision of two algorithms/Conclusion
 
 
-Code location in BG/Q: "/gpfs/u/home/PCP8/PCP8fngj/scratch/matrix-multiplication". 
-
+## Code
+Code locates at BG/Q: "/gpfs/u/home/PCP8/PCP8fngj/scratch/matrix-multiplication". 
 
 Folder details and How to run the codes:
-1. cannon/
-    what is it?
-         c programming code for cannon algorithm, bash scripts to complie and run the c code, python scripts to plot figures, and ouput including text files for data and plots. 
+### 1. cannon/
+- what is it?
+    
+    c programming code for cannon algorithm, bash scripts to complie and run the c code, python scripts to plot figures, and ouput including text files for data and plots. 
 
     How to run code?
         (1) run the cannon algorithm (cannon_alg.c) on BG/Q: 
@@ -37,7 +38,7 @@ Folder details and How to run the codes:
                 $ ./cannon_alg_plot.py
     In addition, all text files for data obtained from BG/Q and corresponding figures are stored in sub-folder "output/" 
 
-2. strip/
+### 2. strip/
     what is it?
          c programming code for strip algorithm, bash scripts to complie and run the c code, and python scripts to plot figures
     How to run code?
