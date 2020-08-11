@@ -46,12 +46,12 @@ Folder details and How to run the codes:
     c programming code for strip algorithm, bash scripts to complie and run the c code, and python scripts to plot figures
 - How to run code?
     - run the strip algorithm (strip_alg.c) on BG/Q: 
-            ```bash
-            $ ./strip_alg_compile.sh
-            $ ./strip_alg_sbatch.sh   num_of_nodes    thrds_per_rk    time_limit
-            ```
+        ```bash
+        $ ./strip_alg_compile.sh
+        $ ./strip_alg_sbatch.sh   num_of_nodes    thrds_per_rk    time_limit
+        ```
     - plot Figures 11-13 in the report for total running time, overall speedup, and parallel efficiency.
-            ```bash
-            $ ./strip_alg_plot.py
-            ```
+        ```bash
+        $ ./strip_alg_plot.py
+        ```
     In addition, text files including Initial conditions of the experiment, Overhead time , Total execution time, and Real Compute execution time for all 25 experiments.  
