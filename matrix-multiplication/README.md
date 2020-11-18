@@ -1,6 +1,8 @@
 # Project: Parallel Matrix Multiplication Algorithms
 
-We implement two parallel matrix multiplication algorithms -- the Cannon's algorithm and the strip algorithm -- using MPI, Pthreads, and MPI I/O and conduct a performance study on the IBM Blue Gene/Q
+We implement two parallel matrix multiplication algorithms -- the Cannon's algorithm and the strip algorithm -- using MPI, Pthreads, and MPI I/O and conduct a performance study on the IBM Blue Gene/Q。
+
+See report [here](report.pdf)
 
 Team Members: Jinghua Feng & Miao Qi 
 
