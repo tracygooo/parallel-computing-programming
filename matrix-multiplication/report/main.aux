@@ -6,9 +6,10 @@
 \citation{b5}
 \citation{b5}
 \citation{b2}
-\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{i}}
+\providecommand \oddpage@label [2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{i}\protected@file@percent }
 \newlabel{introduction}{{I}{i}}
-\@writefile{toc}{\contentsline {section}{\numberline {II}Related Works}{i}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Works}{i}\protected@file@percent }
 \newlabel{related_works}{{II}{i}}
 \citation{b3}
 \citation{b6,b7,b8}
@@ -29,84 +30,84 @@
 \citation{b21}
 \citation{b22}
 \citation{b22}
-\@writefile{toc}{\contentsline {section}{\numberline {III}Implementation of Parallel Algorithms}{ii}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Implementation of Parallel Algorithms}{ii}\protected@file@percent }
 \newlabel{implementation}{{III}{ii}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {III-A}}Cannon's Algorithm}{ii}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Cannon's Algorithm}{ii}\protected@file@percent }
 \newlabel{eq_cannon_runtime}{{1}{iii}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces  Initial alignment of matrices A and B( The sub-blocks at row $i$ of $A$ are rolled $i$ steps leftwards; The sub-blocks at column $j$ of $B$ are rolled $j$ steps upwards}}{iii}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces  Initial alignment of matrices A and B( The sub-blocks at row $i$ of $A$ are rolled $i$ steps leftwards; The sub-blocks at column $j$ of $B$ are rolled $j$ steps upwards}}{iii}\protected@file@percent }
 \newlabel{mat_init}{{1}{iii}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  Rolling one sub-block for matrices $A'$ and $B'$ at first iteration during multiplication phase ($A'$ moves one sub-block leftwards, $B'$ moves one sub-block upwards)}}{iii}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  Rolling one sub-block for matrices $A'$ and $B'$ at first iteration during multiplication phase ($A'$ moves one sub-block leftwards, $B'$ moves one sub-block upwards)}}{iii}\protected@file@percent }
 \newlabel{mat_shift}{{2}{iii}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {III-B}}Strip Algorithm}{iii}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Cannon's algorithm}}{iii}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Strip Algorithm}{iii}\protected@file@percent }
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Cannon's algorithm}}{iii}\protected@file@percent }
 \newlabel{alg:cannon}{{1}{iii}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces The strip algorithm based on block-striped data decomposition}}{iv}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces The strip algorithm based on block-striped data decomposition}}{iv}\protected@file@percent }
 \newlabel{alg:simple}{{2}{iv}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {3}{\ignorespaces  The function \textbf  {StripMatrix}}}{iv}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {3}{\ignorespaces  The function \textbf  {StripMatrix}}}{iv}\protected@file@percent }
 \newlabel{alg:stripmatrix}{{3}{iv}}
 \newlabel{DescriptiveLabel}{{1}{iv}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}C code for the StripMatrix function based on the sequential matrix multiplication algorithm}{iv}}
-\@writefile{toc}{\contentsline {section}{\numberline {IV}Experimental Results and Discussion}{iv}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}C code for the StripMatrix function based on the sequential matrix multiplication algorithm}{iv}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Experimental Results and Discussion}{iv}\protected@file@percent }
 \newlabel{results}{{IV}{iv}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}}Cannon's Algorithm}{v}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}1}Execution time and Speedup ratio}{v}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  Execution time at different \# of MPI ranks for multiplying matrices with different size (1024$\times $1024, 2048$\times $2048, 4096$\times $4096, 8192$\times $8192)}}{v}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Cannon's Algorithm}{v}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}1}Execution time and Speedup ratio}{v}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  Execution time at different \# of MPI ranks for multiplying matrices with different size (1024$\times $1024, 2048$\times $2048, 4096$\times $4096, 8192$\times $8192)}}{v}\protected@file@percent }
 \newlabel{cannon_exe}{{3}{v}}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Execution time for different MPI ranks and matrix sizes}}{v}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Execution time for different MPI ranks and matrix sizes}}{v}\protected@file@percent }
 \newlabel{cannon_tb_exe}{{I}{v}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  Speedup ratios at different \# of MPI ranks for multiplying matrices with different size (1024$\times $1024, 2048$\times $2048, 4096$\times $4096, 8192$\times $8192)}}{v}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  Speedup ratios at different \# of MPI ranks for multiplying matrices with different size (1024$\times $1024, 2048$\times $2048, 4096$\times $4096, 8192$\times $8192)}}{v}\protected@file@percent }
 \newlabel{cannon_spd}{{4}{v}}
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Speedup ratios for different MPI ranks and matrix sizes}}{v}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Speedup ratios for different MPI ranks and matrix sizes}}{v}\protected@file@percent }
 \newlabel{cannon_tb_spd}{{II}{v}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}2}Parallel efficiency}{v}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  Parallel efficiencies at different \# of MPI ranks for multiplying matrices with different size (1024$\times $1024, 2048$\times $2048, 4096$\times $4096, 8192$\times $8192)}}{vi}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}2}Parallel efficiency}{v}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  Parallel efficiencies at different \# of MPI ranks for multiplying matrices with different size (1024$\times $1024, 2048$\times $2048, 4096$\times $4096, 8192$\times $8192)}}{vi}\protected@file@percent }
 \newlabel{cannon_eff}{{5}{vi}}
-\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Parallel efficiency for different MPI ranks and matrix sizes}}{vi}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Parallel efficiency for different MPI ranks and matrix sizes}}{vi}\protected@file@percent }
 \newlabel{cannon_tb_eff}{{III}{vi}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}3}Real time vs. Overhead}{vi}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  Time distribution at different \# of MPI ranks with matrix size 1024$\times $1024}}{vi}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}3}Real time vs. Overhead}{vi}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  Time distribution at different \# of MPI ranks with matrix size 1024$\times $1024}}{vi}\protected@file@percent }
 \newlabel{cannon_distb_1024}{{6}{vi}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  Time distribution at different \# of MPI ranks with matrix size 2048$\times $2048}}{vi}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  Time distribution at different \# of MPI ranks with matrix size 2048$\times $2048}}{vi}\protected@file@percent }
 \newlabel{cannon_distb_2048}{{7}{vi}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}4}Parallel I/O}{vi}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  Time distribution at different \# of MPI ranks with matrix size 4096$\times $4096}}{vii}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  Time distribution at different \# of MPI ranks with matrix size 4096$\times $4096}}{vii}\protected@file@percent }
 \newlabel{cannon_distb_4096}{{8}{vii}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces  Time distribution at different \# of MPI ranks with matrix size 8192$\times $8192}}{vii}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces  Time distribution at different \# of MPI ranks with matrix size 8192$\times $8192}}{vii}\protected@file@percent }
 \newlabel{cannon_distb_8192}{{9}{vii}}
-\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Real time for different MPI ranks and matrix sizes}}{vii}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Real time for different MPI ranks and matrix sizes}}{vii}\protected@file@percent }
 \newlabel{cannon_tb_real}{{IV}{vii}}
-\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces  Time consumed by setting up Cartesian topology for different MPI ranks and matrix sizes}}{vii}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces  Time consumed by setting up Cartesian topology for different MPI ranks and matrix sizes}}{vii}\protected@file@percent }
 \newlabel{cannon_tb_settop}{{V}{vii}}
-\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces  Time consumed by initial alignment for different MPI ranks and matrix sizes}}{vii}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}4}Parallel I/O}{vii}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces  Time consumed by initial alignment for different MPI ranks and matrix sizes}}{vii}\protected@file@percent }
 \newlabel{cannon_tb_align}{{VI}{vii}}
-\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Communication time for different MPI ranks and matrix sizes}}{vii}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Communication time for different MPI ranks and matrix sizes}}{vii}\protected@file@percent }
 \newlabel{cannon_tb_comm}{{VII}{vii}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces  Parallel I/O time at different \# of MPI ranks for writing different matrix size (1024$\times $1024, 2048$\times $2048, 4096$\times $4096, 8192$\times $8192)}}{vii}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces  Parallel I/O time at different \# of MPI ranks for writing different matrix size (1024$\times $1024, 2048$\times $2048, 4096$\times $4096, 8192$\times $8192)}}{vii}\protected@file@percent }
 \newlabel{cannon_io}{{10}{vii}}
-\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Parallel I/O for different MPI ranks and matrix sizes}}{vii}}
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Parallel I/O for different MPI ranks and matrix sizes}}{vii}\protected@file@percent }
 \newlabel{cannon_tb_io}{{VIII}{vii}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}}The Strip Algorithm}{viii}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}1}Time Evaluation}{viii}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces The total time (Y-axis) as a function of the total number of MPI ranks * threads per rank (X-axis) for 25 experiments. Each graph line is for a different value of $threads\_per\_rank$.}}{viii}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}The Strip Algorithm}{viii}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-B}1}Time Evaluation}{viii}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces The total time (Y-axis) as a function of the total number of MPI ranks * threads per rank (X-axis) for 25 experiments. Each graph line is for a different value of $threads\_per\_rank$.}}{viii}\protected@file@percent }
 \newlabel{exec_time}{{11}{viii}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}2}Speedup Evaluation}{viii}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces The overall speedup of all experiments relative to the experiment using 8 threads per MPI rank for 4 compute nodes. Each graph line is for a different value of $threads\_per\_rank$.}}{viii}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-B}2}Speedup Evaluation}{viii}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces The overall speedup of all experiments relative to the experiment using 8 threads per MPI rank for 4 compute nodes. Each graph line is for a different value of $threads\_per\_rank$.}}{viii}\protected@file@percent }
 \newlabel{speedup2}{{12}{viii}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}3}Parallel Efficiency Evaluation}{viii}}
-\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Time for overheads (OH) and real compute execution time (Exe) (in seconds) using different number of compute nodes (Nds) for the strip algorithm }}{ix}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-B}3}Parallel Efficiency Evaluation}{viii}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Time for overheads (OH) and real compute execution time (Exe) (in seconds) using different number of compute nodes (Nds) for the strip algorithm }}{ix}\protected@file@percent }
 \newlabel{te_algo1}{{IX}{ix}}
-\@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces Speedup values for the strip algorithm }}{ix}}
+\@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces Speedup values for the strip algorithm }}{ix}\protected@file@percent }
 \newlabel{se_algo1}{{X}{ix}}
-\@writefile{lot}{\contentsline {table}{\numberline {XI}{\ignorespaces Parallel efficiency values for the strip algorithm }}{ix}}
+\@writefile{lot}{\contentsline {table}{\numberline {XI}{\ignorespaces Parallel efficiency values for the strip algorithm }}{ix}\protected@file@percent }
 \newlabel{pe_algo1}{{XI}{ix}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces  Parallel efficiency for 25 experiments. Each graph line is for a different value of $threads\_per\_rank$.}}{ix}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces  Parallel efficiency for 25 experiments. Each graph line is for a different value of $threads\_per\_rank$.}}{ix}\protected@file@percent }
 \newlabel{efficiency}{{13}{ix}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-C}}Comparison of two algorithms}{ix}}
-\@writefile{lot}{\contentsline {table}{\numberline {XII}{\ignorespaces Execution time of Cannon's algorithm and Strip algorithm with 4, 16, and 64 nodes}}{ix}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Comparison of two algorithms}{ix}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {XII}{\ignorespaces Execution time of Cannon's algorithm and Strip algorithm with 4, 16, and 64 nodes}}{ix}\protected@file@percent }
 \newlabel{cannon_tb_comp_two_algs}{{XII}{ix}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusions}{ix}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusions}{ix}\protected@file@percent }
 \newlabel{conclusions}{{V}{ix}}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Future Work}{ix}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Future Work}{ix}\protected@file@percent }
 \newlabel{future_work}{{VI}{ix}}
 \citation{b1}
 \bibcite{b1}{1}
@@ -131,4 +132,4 @@
 \bibcite{b20}{20}
 \bibcite{b21}{21}
 \bibcite{b22}{22}
-\@writefile{toc}{\contentsline {section}{References}{x}}
+\@writefile{toc}{\contentsline {section}{References}{x}\protected@file@percent }

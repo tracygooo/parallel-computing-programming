@@ -3,7 +3,8 @@
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
-\usepackage[options ]{algorithm2e}
+%\usepackage[options ]{algorithm2e}
+\usepackage[ruled,vlined]{algorithm2e}
 \usepackage{multirow}
 \usepackage{listings}
 \usepackage{graphicx}
@@ -124,7 +125,7 @@ The main steps to implement Cannon's algorithm are shown in Algorithm \ref{alg:c
     Step 9: If rank 0 / thread 0, end to record execution time with GetTimeBase()\;
     Step 10: Deallocate memory and finalize MPI.
   }
- \End
+ %\End
  \caption{Cannon's algorithm}
  \label{alg:cannon}
 \end{algorithm}
@@ -139,7 +140,7 @@ This parallel algorithm requires less communication between processors compared 
 
 The Algorithm \ref{alg:simple} describes the main steps of our strip algorithm. After setting up the MPI, we assigned each rank with some rows of the input matrix $A$. If threads are needed, we assign the computational work to each thread equally and collect results from them later. MPI ranks are regarded as threads and will perform a subtask as other pthreads to maximize the parallelism of computation. After all ranks finish their work, we put the local results into a global result matrix.
 
-\begin{algorithm}[H]
+\begin{algorithm}[!htb]
 \SetAlgoLined
 \KwIn{$A$: a $n \times n $ matrix ; $B$: a $n \times n $ matrix }
 \KwOut{$C$: a $n \times n $ matrix }
@@ -160,7 +161,7 @@ The Algorithm \ref{alg:simple} describes the main steps of our strip algorithm. 
     Step 9: If rank 0 / thread 0, end to record execution time with GetTimeBase()\;
     Step 10: Free dynamically allocated memory.
   }
- \End
+ %\End
  \caption{The strip algorithm based on block-striped data decomposition}
  \label{alg:simple}
 \end{algorithm}
@@ -168,14 +169,14 @@ The Algorithm \ref{alg:simple} describes the main steps of our strip algorithm. 
  
 The Algorithm \ref{alg:stripmatrix} explains the method used to do the local calculation of each subtask. In general, it is a sequential algorithm for matrix multiplication performed on a subtask.\\
 
-\begin{algorithm}[H]
+\begin{algorithm}[!htb]
 \SetAlgoLined
 \KwIn{$A'$: a $k \times n $ matrix ; $B$: a $n \times n $ matrix }
 \KwOut{$C'$: a $k \times n $ matrix }
  \Begin
   {Step 1: Apply the standard sequential Matrix Multiplication to $A'$ and $B'$ to calculate $C'$
   }
- \End
+ %\End
  \caption{ The function \textbf{StripMatrix}}
  \label{alg:stripmatrix}
 \end{algorithm}
@@ -200,7 +201,7 @@ To evaluate the correctness of our implementations for both algorithms, we gener
 %-----------------------------------------------------------------
 % Execution time and Speedup
 %-----------------------------------------------------------------
-\subsubsection{Execution time and Speedup ratio}\\
+\subsubsection{Execution time and Speedup ratio}
 The total execution time of Cannon's algorithm versus number of MPI ranks is displayed in Figure \ref{cannon_exe} and in Table \ref{cannon_tb_exe}. The results show that the execution time decreases with the increasing number of MPI ranks. The execution time typically increases around 8 times as the matrix size doubles, which is consistent with Equation \ref{eq_cannon_runtime}. But for the matrices of small size ($1024\times1024$, $2048 \times 2048$), it does not satisfy Equation \ref{eq_cannon_runtime} at $4096$ MPI ranks. The reason is that the real execution time (time consumed by real matrix multiplication) with large number of MPI ranks (i.e.,$4096$) is very small, which may be comparable to overhead of Cannon's algorithm. By using the execution time of 1 node (64 MPI ranks) to compute the multiplication of $8192\times8192$ matrices as the base, we obtain the speedup ratios in Figure \ref{cannon_spd} and Table \ref{cannon_tb_spd}, which indicates that the speedup increases with increase of MPI ranks. Similarly, the speedup ratio does not have obvious increase when matrix rise from $1024$ to $2048$ at $4096$ MPI ranks. 
 % -------- Figure: execution time ----------------
 \begin{figure}[!h]
@@ -666,7 +667,7 @@ For Strip algorithm, please go to folder "strip/" and run the commands below:
 \bibitem{b2}  Z.A.A. Alqadi, M. Aqel, and I. M. M. El Emary , ``Performance Analysis and Evaluation of Parallel Matrix Multiplication Algorithms,'' World Applied Sciences Journal, vol. 5, pp.211--214, January 2008.
 \bibitem{b3} H.H. Abuazab , A.O. Dahmane, and H. Hamam1 , ``Sub Tasks Matrix Multiplication Algorithm (STMMA),'' World Applied Sciences Journal ,vol. 18, pp.1455--1462, 2012.
 
-\bibitem{b4} Y. Li, and H. Li , ``Optimization of Parallel I/O for Cannon's Algorithm Based on Lustre,'' 11th International Symposium on Distributed Computing and Applications to Business, Engineering & Science ,2012. [Online].  Available: https://ieeexplore.ieee.org/abstract/document/6385233.
+\bibitem{b4} Y. Li, and H. Li , ``Optimization of Parallel I/O for Cannon's Algorithm Based on Lustre,'' 11th International Symposium on Distributed Computing and Applications to Business, Engineering \& Science ,2012. [Online].  Available: https://ieeexplore.ieee.org/abstract/document/6385233.
 
 \bibitem{b5} M.Gilge, IBM System Blue Gene Solution Blue Gene/Q Application Development. International Business Machines Corporation, U.S., 2013.
 
@@ -687,7 +688,7 @@ multiplication on a 3D systolic array ,'' Microelectronics Journal ,vol. 27, pp.
 
 \bibitem{b11} E. Dekel, D. Nassimi, and S. Sahni, ``Parallel Matrix and Graph Algorithms,''SIAM Journal on Computing, vol.10, pp. 657--673, 1981. 
 
-\bibitem{b12} J. Choi , J.J. Dongarra, and D.W. Walker,``PUMMA : Parallel Universal Matrix Multiplication Algorithms on Distributed Memory Concurrent Computers,'' Concurrency: Practice and Experience,1994. [Online].Available: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.55.6125&rep=\\rep1&type=pdf.
+\bibitem{b12} J. Choi , J.J. Dongarra, and D.W. Walker,``PUMMA : Parallel Universal Matrix Multiplication Algorithms on Distributed Memory Concurrent Computers,'' Concurrency: Practice and Experience,1994. [Online].Available: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.55.6125\&rep=\\rep1\&type=pdf.
 
 \bibitem{b13} J. Li, A. Skjellum, and R. D. Falgout, ``A poly-algorithm for parallel dense matrix multiplication on two-dimensional process grid topologies,'' Concurrency - Practice and Experience , vol.9, pp. 345--389, 1997. 
 
