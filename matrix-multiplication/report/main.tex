@@ -18,18 +18,18 @@
 
 \title{Performance of Parallel Matrix Multiplication Algorithms on Blue Gene Q Supercomputer}
 
-\author{\IEEEauthorblockN{Miao Qi}
-\IEEEauthorblockA{\textit{Department of Computer Science} \\
-\textit{Rensselaer Polytechnic Institute}\\
-Tory NY, US \\
-qim@rpi.edu}
+\author{
+    \IEEEauthorblockN{Jinghua Feng}
+    \IEEEauthorblockA{\textit{Department of Computer Science} \\
+    \textit{Rensselaer Polytechnic Institute}\\
+    Tory NY, US \\
+    fengj3@rpi.edu}
 \and
-\IEEEauthorblockN{Jinghua Feng}
-\IEEEauthorblockA{\textit{Department of Mechanical, Aerospace, and Nuclear Engineering} \\
-\textit{Rensselaer Polytechnic Institute}\\
-Tory NY, US \\
-fengj3@rpi.edu}
-
+    \IEEEauthorblockN{Miao Qi}
+    \IEEEauthorblockA{\textit{Department of Computer Science} \\
+    \textit{Rensselaer Polytechnic Institute}\\
+    Tory NY, US \\
+    qim@rpi.edu}
 }
 
 \maketitle
@@ -37,7 +37,7 @@ fengj3@rpi.edu}
 \pagestyle{plain}
 
 \begin{abstract}
-Matrix multiplication, as a core scientific computation operation, is used to deal with information flow by converting data into machine-readable codes and then back to data. It can be applied to various domains to solve real-life problems such as weather pattern analysis \cite{b1}. However, the data matrices existing in real life always have large sizes and the matrix multiplication requires $O(n^3)$ operations, where $n$ is the dimension of a matrix. So, it is time consuming and memory inefficient to execute a sequential algorithm on large matrices. However, the emergence of supercomputers and parallel computing architectures allows previous non-executable or inefficient computations to be done in a reasonable period of time. It leads to the development of parallel algorithms with the goal to minimize the compute execution time through overlapping the computations among processors and to simultaneously increase the overall efficiency by optimizing the data communication pattern between various processors. We have studied two parallel algorithms - the well-known Cannon's algorithm based on the checkerboard data decomposition and the strip algorithm based on the block-striped data decomposition - to solve the matrix multiplication problem with large size matrices. Cannon's algorithm is more memory-efficient while the strip algorithm has less overheads. In our implementation of these two parallel matrix multiplication algorithms in C, we applied Message Passing Interface (MPI), POSIX Threads (Pthreads), and MPI parallel I/O. And we studied the performance of these algorithms by running them on the Blue Gene/Q system using up to 8192 processors. 
+Matrix multiplication, as a core scientific computation operation, is used to deal with information flow by converting data into machine-readable codes and then back to data. It can be applied in various domains to solve real-life problems such as weather pattern analysis \cite{b1}. However, the data matrices existing in real life usually have large size. The matrix multiplication requires $O(n^3)$ operations, where $n$ is the dimension of a matrix. Therefore, it is time consuming and memory inefficient to execute a sequential algorithm on large matrices. However, the emergence of supercomputers and parallel computing architectures allows previous non-executable or inefficient computations to be done in a reasonable period of time. It leads to the development of parallel algorithms with the goal to minimize the compute execution time through overlapping the computations among processors and to simultaneously increase the overall efficiency by optimizing the data communication pattern between various processors. We have studied two parallel algorithms - the well-known Cannon's algorithm based on the checkerboard data decomposition and the strip algorithm based on the block-striped data decomposition - to solve the matrix multiplication problem with large size matrices. Cannon's algorithm is more memory-efficient while the strip algorithm has less overheads. In our implementation of these two parallel matrix multiplication algorithms in C, we applied Message Passing Interface (MPI), POSIX Threads (Pthreads), and MPI parallel I/O. And we studied the performance of these algorithms by running them on the Blue Gene/Q system using up to 8192 processors. 
 \end{abstract}
 
 \begin{IEEEkeywords}
